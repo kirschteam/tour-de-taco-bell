@@ -176,6 +176,15 @@ var STOPS = [
 ["17130 Evans Plz","Omaha · 168th & Maple"]
 ];
 
+/* [lat, lng] per stop, same order as STOPS (geocoded via OSM Nominatim) */
+var COORDS = [[41.26483,-95.8415],[41.24168,-95.82626],[41.22887,-95.84966],[41.26165,-95.88856],[41.32834,-95.95829],[41.31453,-96.02446],[41.30539,-96.05202],[41.288,-96.08072],[41.2593,-96.02192],[41.25933,-95.97077],[41.22099,-95.97537],[41.2127,-95.9862],[41.14438,-95.91225],[41.1593,-95.93593],[41.14064,-95.97509],[41.1379,-96.02824],[41.17944,-96.04324],[41.21106,-96.02444],[41.23296,-96.04367],[41.23394,-96.1017],[41.23444,-96.14239],[41.20442,-96.08176],[41.20466,-96.12773],[41.19135,-96.19969],[41.14463,-96.16281],[41.19262,-96.2353],[41.23352,-96.20255],[41.26799,-96.23492],[41.29274,-96.14228],[41.2915,-96.18284]];
+
+/* planned order per stop: breakfast + coffee/OJ at stops 1-4 (gone by 11 AM),
+   the rest calorie-balanced (~1,100-1,270 cal/stop), max 2 drinks per stop */
+var PLAN = [["bk-cw-sausage","bk-q-steak","bk-salsa","ctb-bacon","cin-coffee-hot"],["bk-cw-bacon","ctb-sausage","gtb-bacon","hash-brown","coffee-iced"],["bk-cal-cw-bacon","bk-q-sausage","ctb-potato","cin-coffee-iced","coffee-hot"],["bk-q-bacon","gtb-sausage","gtb-steak","oj"],["ref-mango","f-g2","s-cinnabon","s-mild"],["baja-freeze","n-bellgrande","s-hot","t-dlt"],["gcb","f-wild-straw","f-baja-zero","s-bb-rice"],["f-pepsi-zero","cc-bacon-melt","s-twists","t-bb-chalupa"],["bb-gcb","lx-stacker","s-diablo","t-crunchy"],["bean-burrito","f-lipton-unsweet","pj-fries","t-soft-beef"],["water","pj-melty","sp-rollup","t-chalupa-beef"],["cc-rolled-q","ds-baja-zero","ref-dragon","sp-enchirito"],["f-starry","s-black-beans","s-pintos","sp-mex-pizza"],["av-verde","f-pepsi","n-chips-cheese","sp-cws"],["bs-beef","f-diet-pepsi","cc-taco-ranch","q-chicken"],["jal-citrus","f-lipton-sweet","sp-flatbread","sp-bb-cws"],["f-drpepper","pineapple-freeze","s-fire","t-dcgc"],["f-dew-zero","f-mug","n-chips-guac","cc-burr-ranch"],["f-trop-lemonade","q-steak","s-fiesta-pot"],["lx-dip","t-cgc","t-spicy-potato"],["b5l","ref-rock-punch","f-midnight"],["cc-bowl","ref-rock-pine","f-baja"],["cc-burrito","ds-lemonade","lx-salad"],["cc-crispy","f-dew","s-nacho-fries"],["ds-baja-freeze","ds-pepsi","t-soft-sup"],["cbr","f-brisk","lx-griller"],["cc-strips","pj-fresca","t-crunchy-sup"],["q-cheese","t-dlt-sup","veggie-bowl"],["ds-baja","ref-strawpass","sp-veg-pizza"],["cdb","cc-soft","ds-midnight"]];
+var PLAN_STOP = {};
+PLAN.forEach(function (ids, i) { ids.forEach(function (id) { PLAN_STOP[id] = i; }); });
+
 var JERSEYS = ["#FF3D9A","#3EE8D2","#FFC53D","#8FE85C","#B08CFF"];
 var DEFAULT_NAMES = ["Wyatt","Jack","Tyler","Alex","Ryan"];
 var RACE_DAY = "2026-08-30";
@@ -314,6 +323,11 @@ function itemsAtStop(si) {
   }
   return out;
 }
+function planCal(si) {
+  var s = 0;
+  (PLAN[si] || []).forEach(function (id) { var it = itemById(id); if (it) s += it[4]; });
+  return s;
+}
 function eatenCount() { var n = 0; for (var k in state.items) n++; return n; }
 function stopCounts() {
   var done = 0, skip = 0;
@@ -430,7 +444,8 @@ var CSS = [
 '.pchip{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#1B0B26}',
 '.tick{flex:0 0 auto;width:26px;height:26px;border-radius:50%;border:2px dashed var(--line)}',
 '.strip{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}',
-'.dot{width:calc((100% - 45px)/10);aspect-ratio:1;border-radius:6px;background:var(--surface2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted)}',
+'.dot{width:calc((100% - 45px)/10);aspect-ratio:1;border-radius:6px;background:var(--surface2);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15;font-size:11px;color:var(--muted)}',
+'.dot .dc{font-size:8px;opacity:.75}',
 '.dot.done{background:var(--teal);border-color:var(--teal);color:#06251f;font-weight:700}',
 '.dot.skip{background:transparent;border-style:dashed;color:var(--line);text-decoration:line-through}',
 '.dot.next{border-color:var(--gold);color:var(--gold);box-shadow:0 0 0 2px #6b4c10}',
@@ -441,6 +456,18 @@ var CSS = [
 '.stoprow .t{font-size:11px;color:var(--teal)}',
 '.stopitems{font-size:12px;color:var(--muted);margin-top:4px;cursor:pointer}',
 '.stopitems b{color:var(--teal);font-weight:700}',
+'.stopitems.plan{opacity:.75}.stopitems.plan em{font-style:normal;color:var(--gold)}',
+'#mapwrap{position:fixed;left:0;right:0;bottom:calc(52px + env(safe-area-inset-bottom));z-index:10;display:none;background:var(--bg)}',
+'#map{width:100%;height:100%;background:var(--bg)}',
+'.mdot{width:26px;height:26px;border-radius:50%;background:#3A1B55;border:2px solid #FF3D9A;color:#fff;font:700 12px/1 Rubik,sans-serif;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.5)}',
+'.mdot.done{background:#3EE8D2;border-color:#3EE8D2;color:#06251f}',
+'.mdot.skip{opacity:.45;border-color:#4A2668}',
+'.mdot.next{background:#FFC53D;border-color:#FFC53D;color:#1B0B26}',
+'.maplegend{position:absolute;left:10px;bottom:10px;z-index:1000;background:rgba(27,11,38,.88);border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-size:11px;color:var(--muted);display:flex;gap:12px}',
+'.maplegend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}',
+'.maperr{padding:40px 20px;text-align:center;color:var(--muted)}',
+'.leaflet-popup-content{font-family:Rubik,sans-serif;font-size:13px;margin:10px 12px}',
+'.leaflet-popup-content .pa{font-weight:700}.leaflet-popup-content .pi{color:#555;font-size:12px;margin-top:4px}',
 '.ordlist{max-height:48vh;overflow-y:auto;margin:10px 0;-webkit-overflow-scrolling:touch}',
 '.ordhead{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin:10px 2px 6px}',
 '.ordrow{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:9px 10px;margin-bottom:7px}',
@@ -511,18 +538,21 @@ function render() {
   if (tab === 'race') html += renderRace(pct);
   else if (tab === 'menu') html += renderMenu();
   else if (tab === 'route') html += renderRoute();
+  else if (tab === 'map') html += '';
   else html += renderSquad();
   html += '</main>';
   html += '<nav>' + [
     ['race', '🏁', 'Race'],
     ['menu', '🌮', 'Menu'],
     ['route', '🗺', 'Route'],
+    ['map', '📍', 'Map'],
     ['squad', '🚴', 'Squad']
   ].map(function (t) {
     return '<button class="tabbtn' + (tab === t[0] ? ' on' : '') + '" data-tab="' + t[0] + '"><span class="ic">' + t[1] + '</span><span class="lb">' + t[2] + '</span></button>';
   }).join('') + '</nav>';
   root.innerHTML = html;
   wire();
+  showMap(tab === 'map');
 }
 
 function renderRace(pct) {
@@ -548,7 +578,9 @@ function renderRace(pct) {
       '<div class="stage-badge' + (isFinish ? ' finish' : '') + '"><span class="sn disp num">' + (ns + 1) + '</span><span class="sk">stage</span></div>' +
       '<div><div class="addr">' + esc(STOPS[ns][0]) + '</div><div class="city">' + esc(STOPS[ns][1]) + '</div></div>' +
       '<a class="navbtn" target="_blank" rel="noopener" href="' + mapsUrl(ns) + '">Navigate</a>' +
-      '</div></div>';
+      '</div>' +
+      ((PLAN[ns] || []).length ? '<div class="stopitems plan" style="margin-top:10px" data-editorder="' + ns + '"><em>order plan · ~' + planCal(ns).toLocaleString() + ' cal:</em> ' + PLAN[ns].map(function (id) { var it2 = itemById(id); return it2 ? esc(it2[2]) : ''; }).join(' · ') + '</div>' : '') +
+      '</div>';
   } else {
     h += '<div class="card"><h2>Route</h2><div class="disp" style="font-size:22px;color:var(--gold)">Every stage complete 🏆</div></div>';
   }
@@ -599,7 +631,8 @@ function renderMenu() {
         : '<span class="tick"></span>';
       h += '<button class="itemrow' + (e ? ' done' : '') + '" data-item="' + it[0] + '">' + chip +
         '<span class="nm">' + esc(it[2]) + (it[3] ? ' <span class="note">' + esc(it[3]) + '</span>' : '') +
-        (e && e.s != null ? ' <span class="note num">· stage ' + (e.s + 1) + '</span>' : '') + '</span>' +
+        (e && e.s != null ? ' <span class="note num">· stage ' + (e.s + 1) + '</span>'
+          : !e && PLAN_STOP[it[0]] != null ? ' <span class="note num">· plan stg ' + (PLAN_STOP[it[0]] + 1) + '</span>' : '') + '</span>' +
         '<span class="cal num">' + it[4] + (it[8] ? '~' : '') + ' cal</span></button>';
     });
   });
@@ -613,7 +646,8 @@ function renderRoute() {
   for (var i = 0; i < STOPS.length; i++) {
     var st = state.stops[i];
     var cls = st && st.s === 'done' ? ' done' : st && st.s === 'skip' ? ' skip' : (i === ns ? ' next' : '');
-    h += '<div class="dot num' + cls + '">' + (i + 1) + '</div>';
+    var got = itemsAtStop(i).length, pln = (PLAN[i] || []).length;
+    h += '<div class="dot num' + cls + '">' + (i + 1) + '<span class="dc">' + (got > 0 ? got + '/' + pln : '~' + pln) + '</span></div>';
   }
   h += '</div></div>';
   for (var j = 0; j < STOPS.length; j++) {
@@ -628,6 +662,8 @@ function renderRoute() {
       }).join(' · ') + '</div>';
     } else if (status === 'done') {
       orderHtml = '<div class="stopitems" data-editorder="' + j + '">+ add what was ordered</div>';
+    } else if (status !== 'skip' && (PLAN[j] || []).length) {
+      orderHtml = '<div class="stopitems plan" data-editorder="' + j + '"><em>plan · ~' + planCal(j).toLocaleString() + ' cal:</em> ' + PLAN[j].map(function (id) { var it = itemById(id); return it ? esc(it[2]) : ''; }).join(' · ') + '</div>';
     }
     h += '<div class="stoprow' + (status === 'done' ? ' done' : status === 'skip' ? ' skip' : '') + '">' +
       '<div class="stage-badge' + (isFinish ? ' finish' : '') + '" style="width:44px;height:44px"><span class="sn disp num" style="font-size:16px">' + (j + 1) + '</span><span class="sk">' + (isFinish ? 'finish' : 'stage') + '</span></div>' +
@@ -671,6 +707,60 @@ function renderSquad() {
       '</div>';
   }
   return h;
+}
+
+/* ---------------- map (Leaflet, lazy-loaded) ---------------- */
+var map = null, mapMarkers = [], leafletLoading = false;
+
+function mapIcon(i) {
+  var st = state.stops[i], ns = nextStopIdx();
+  var cls = st && st.s === 'done' ? ' done' : st && st.s === 'skip' ? ' skip' : i === ns ? ' next' : '';
+  return L.divIcon({ className: '', html: '<div class="mdot' + cls + '">' + (i + 1) + '</div>', iconSize: [26, 26], iconAnchor: [13, 13] });
+}
+function popupHtml(i) {
+  var oi = itemsAtStop(i);
+  var lines = oi.length
+    ? oi.map(function (o) { return esc(o.it[2]) + ' (' + esc((state.names[o.e.p] || '?').charAt(0)) + ')'; }).join('<br>')
+    : 'Plan · ~' + planCal(i).toLocaleString() + ' cal:<br>' + (PLAN[i] || []).map(function (id) { var it = itemById(id); return it ? esc(it[2]) : ''; }).join('<br>');
+  return '<div class="pa">' + (i + 1) + ' · ' + esc(STOPS[i][0]) + '</div>' +
+    '<div class="pi">' + lines + '</div>' +
+    '<div style="margin-top:6px"><a target="_blank" rel="noopener" href="' + mapsUrl(i) + '">Navigate →</a></div>';
+}
+function updateMap() {
+  if (!map) return;
+  mapMarkers.forEach(function (mk, i) { mk.setIcon(mapIcon(i)); mk.setPopupContent(popupHtml(i)); });
+}
+function initMap() {
+  if (map) { updateMap(); setTimeout(function () { map.invalidateSize(); }, 60); return; }
+  var w = document.getElementById('mapwrap');
+  if (!window.L) {
+    if (leafletLoading) return;
+    leafletLoading = true;
+    w.innerHTML = '<div class="maperr">Loading map…</div>';
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(l);
+    var s = document.createElement('script'); s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    s.onload = function () { leafletLoading = false; if (tab === 'map') initMap(); };
+    s.onerror = function () { leafletLoading = false; w.innerHTML = '<div class="maperr">Map failed to load. Check your connection, then reopen this tab.</div>'; };
+    document.head.appendChild(s);
+    return;
+  }
+  w.innerHTML = '<div id="map"></div><div class="maplegend"><span><i style="background:#FFC53D"></i>next</span><span><i style="background:#3EE8D2"></i>done</span><span><i style="background:#3A1B55;border:1px solid #FF3D9A"></i>to go</span></div>';
+  map = L.map('map', { zoomControl: false });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19 }).addTo(map);
+  L.polyline(COORDS, { color: '#FF3D9A', weight: 3, opacity: .75 }).addTo(map);
+  mapMarkers = COORDS.map(function (c, i) {
+    return L.marker(c, { icon: mapIcon(i) }).addTo(map).bindPopup(popupHtml(i));
+  });
+  map.fitBounds(L.latLngBounds(COORDS), { padding: [26, 26] });
+}
+function showMap(show) {
+  var w = document.getElementById('mapwrap');
+  if (!w) { w = document.createElement('div'); w.id = 'mapwrap'; document.body.appendChild(w); }
+  if (!show) { w.style.display = 'none'; return; }
+  var hd = document.querySelector('header');
+  w.style.top = (hd ? hd.offsetHeight : 70) + 'px';
+  w.style.display = 'block';
+  initMap();
 }
 
 /* ---------------- sheets ---------------- */
@@ -732,15 +822,19 @@ function openOrderSheet(si) {
 
   function draw() {
     var q = search.toLowerCase();
-    var mine = [], rest = [];
+    var planIds = PLAN[si] || [];
+    var mine = [], planned = [], rest = [];
     ITEMS.forEach(function (it) {
       var e = state.items[it[0]];
-      if (e && e.s === si) mine.push(it);
-      else if (!e && (!q || it[2].toLowerCase().indexOf(q) >= 0)) rest.push(it);
+      if (e && e.s === si) { mine.push(it); return; }
+      if (e) return;
+      if (q && it[2].toLowerCase().indexOf(q) < 0) return;
+      if (planIds.indexOf(it[0]) >= 0) planned.push(it); else rest.push(it);
     });
     var hh = '';
     if (mine.length) hh += '<div class="ordhead">Ordered here · ' + mine.length + '</div>' + mine.map(row).join('');
-    hh += '<div class="ordhead">' + (q ? 'Matches' : 'Items left') + '</div>';
+    if (planned.length) hh += '<div class="ordhead">Planned for this stop · ~' + planCal(si).toLocaleString() + ' cal</div>' + planned.map(row).join('');
+    hh += '<div class="ordhead">' + (q ? 'Matches' : 'Everything else') + '</div>';
     hh += rest.slice(0, 40).map(row).join('');
     if (rest.length > 40) hh += '<div class="finish-note">' + (rest.length - 40) + ' more — search to narrow down</div>';
     if (!rest.length) hh += '<div class="finish-note">' + (q ? 'no matches' : 'nothing left to eat 🏆') + '</div>';
