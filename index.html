@@ -470,6 +470,7 @@ var CSS = [
 '.stopitems.plan{opacity:.75}.stopitems.plan em{font-style:normal;color:var(--gold)}',
 '#mapwrap{position:fixed;left:0;right:0;bottom:calc(52px + env(safe-area-inset-bottom));z-index:10;display:none;background:var(--bg)}',
 '#map{width:100%;height:100%;background:var(--bg)}',
+'#map .leaflet-tile{filter:invert(1) hue-rotate(200deg) brightness(.9) saturate(.55) contrast(.95)}',
 '.mdot{width:26px;height:26px;border-radius:50%;background:#3A1B55;border:2px solid #FF3D9A;color:#fff;font:700 12px/1 Rubik,sans-serif;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.5)}',
 '.mdot.done{background:#3EE8D2;border-color:#3EE8D2;color:#06251f}',
 '.mdot.skip{opacity:.45;border-color:#4A2668}',
@@ -807,7 +808,7 @@ function initMap() {
   }
   w.innerHTML = '<div id="map"></div><div class="maplegend"><span><i style="background:#FFC53D"></i>next</span><span><i style="background:#3EE8D2"></i>done</span><span><i style="background:#3A1B55;border:1px solid #FF3D9A"></i>to go</span></div>';
   map = L.map('map', { zoomControl: false });
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19 }).addTo(map);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap', maxZoom: 19 }).addTo(map);
   L.polyline(COORDS, { color: '#FF3D9A', weight: 3, opacity: .75 }).addTo(map);
   mapMarkers = COORDS.map(function (c, i) {
     return L.marker(c, { icon: mapIcon(i) }).addTo(map).bindPopup(popupHtml(i));
