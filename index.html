@@ -201,7 +201,7 @@ var ITEM_W = 0.7, STOP_W = 0.3; /* completion weighting */
 function freshState() { return { names: DEFAULT_NAMES.slice(), start: null, items: {}, stops: {} }; }
 var state = freshState();
 var syncMode = DB_URL ? 'connecting' : 'solo';
-var tab = 'race', menuFilter = 'all', menuSearch = '';
+var tab = 'race', menuFilter = 'all', menuSearch = '', planSel = -1;
 
 function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
 try { tab = sessionStorage.getItem('tdtb-tab') || 'race'; } catch (e) {}
@@ -551,6 +551,7 @@ function render() {
   else if (tab === 'menu') html += renderMenu();
   else if (tab === 'route') html += renderRoute();
   else if (tab === 'map') html += '';
+  else if (tab === 'plan') html += renderPlan();
   else html += renderSquad();
   html += '</main>';
   html += '<nav>' + [
@@ -558,6 +559,7 @@ function render() {
     ['menu', '🌮', 'Menu'],
     ['route', '🗺', 'Route'],
     ['map', '📍', 'Map'],
+    ['plan', '📋', 'Plan'],
     ['squad', '🚴', 'Squad']
   ].map(function (t) {
     return '<button class="tabbtn' + (tab === t[0] ? ' on' : '') + '" data-tab="' + t[0] + '"><span class="ic">' + t[1] + '</span><span class="lb">' + t[2] + '</span></button>';
@@ -688,6 +690,47 @@ function renderRoute() {
       '<button class="sbtn skip-btn" data-stopskip="' + j + '">' + (status === 'skip' ? 'unskip' : 'skip') + '</button>' +
       '</div></div>';
   }
+  return h;
+}
+
+function renderPlan() {
+  var sel = planSel >= 0 ? planSel : (me >= 0 ? me : 0);
+  var h = '<div class="filters" style="top:auto;position:static">';
+  for (var p = 0; p < 5; p++) {
+    h += '<button class="fbtn psel' + (sel === p ? ' on' : '') + '" data-psel="' + p + '"' +
+      (sel === p ? ' style="background:' + JERSEYS[p] + ';border-color:' + JERSEYS[p] + ';color:#1B0B26"' : '') + '>' +
+      esc(state.names[p]) + '</button>';
+  }
+  h += '</div>';
+
+  var totalCal = 0, totalN = 0, eatenN = 0, eatenCal = 0;
+  var rows = '';
+  for (var si = 0; si < STOPS.length; si++) {
+    var mine = (PLAN[si] || []).filter(function (id) { return PLAN_RIDER[id] === sel; });
+    if (!mine.length) continue;
+    mine.forEach(function (id) {
+      var it = itemById(id); if (!it) return;
+      totalCal += it[4]; totalN++;
+      var e = state.items[id];
+      var status;
+      if (e && e.p === sel) { status = '<span style="color:var(--good)">✓ eaten</span>'; eatenN++; eatenCal += it[4]; }
+      else if (e) status = '<span style="color:var(--gold)">' + pInit(e.p) + ' ate it</span>';
+      else status = '<span class="num">' + it[4] + (it[8] ? '~' : '') + ' cal</span>';
+      rows += '<button class="itemrow' + (e ? ' done' : '') + '" data-item="' + id + '">' +
+        '<span class="pchip" style="background:var(--surface2);color:var(--teal);border:1px solid var(--line)">' + (si + 1) + '</span>' +
+        '<span class="nm">' + esc(it[2]) + (it[3] ? ' <span class="note">' + esc(it[3]) + '</span>' : '') +
+        '<span class="note"> · ' + esc(STOPS[si][0]) + '</span></span>' +
+        '<span class="cal">' + status + '</span></button>';
+    });
+  }
+
+  h += '<div class="card"><h2>' + esc(state.names[sel]) + '’s day</h2>' +
+    '<div class="kv"><span class="k">Planned</span><span class="num">' + totalN + ' items · ~' + totalCal.toLocaleString() + ' cal</span></div>' +
+    '<div class="kv"><span class="k">Eaten so far</span><span class="num">' + eatenN + ' items · ' + eatenCal.toLocaleString() + ' cal</span></div>' +
+    '<div class="pbar"><i style="width:' + (totalN ? Math.round(eatenN / totalN * 100) : 0) + '%;background:' + JERSEYS[sel] + '"></i></div>' +
+    '</div>';
+  h += rows;
+  h += '<div class="finish-note">number = stage · tap an item to log it</div>';
   return h;
 }
 
@@ -968,6 +1011,9 @@ function wire() {
       if (cur && cur.s === 'skip') dispatch({ k: 'stop', i: i, s: null, t: Date.now() });
       else dispatch({ k: 'stop', i: i, s: 'skip', t: Date.now() });
     });
+  });
+  root.querySelectorAll('[data-psel]').forEach(function (b) {
+    b.addEventListener('click', function () { planSel = parseInt(b.getAttribute('data-psel'), 10); render(); });
   });
   root.querySelectorAll('[data-me]').forEach(function (b) {
     b.addEventListener('click', function () { me = parseInt(b.getAttribute('data-me'), 10); ls('tdtb-player', String(me)); render(); });
