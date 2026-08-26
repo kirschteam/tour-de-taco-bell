@@ -1,9 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1B0B26">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Tour de Taco Bell</title>
-<script id="STATE" type="application/json">{"v":1,"names":["Wyatt","Jack","Tyler","Alex","Ryan"],"start":null,"items":{},"stops":{}}</script>
-<script id="APP">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%8C%AE%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Rubik:wght@400;500;700&display=swap">
+</head>
+<body>
+<div id="root"></div>
+<script>
 (function () {
 'use strict';
-var APP_EL = document.currentScript;
+
+/* ============ CONFIG ============ */
+/* Paste the Firebase Realtime Database URL here (https://<project>-default-rtdb.firebaseio.com).
+   Empty string = solo mode: works on this device only, saves to localStorage. */
+var DB_URL = '';
+var DB_PATH = '/tour-de-taco-bell-2026';
 
 /* ---------------- static data ---------------- */
 /* [id, category, name, sizeNote, cal, protein, carbs, fat, est] — largest size everywhere */
@@ -158,75 +177,131 @@ var STOPS = [
 ];
 
 var JERSEYS = ["#FF3D9A","#3EE8D2","#FFC53D","#8FE85C","#B08CFF"];
+var DEFAULT_NAMES = ["Wyatt","Jack","Tyler","Alex","Ryan"];
 var RACE_DAY = "2026-08-30";
 var BK_CUTOFF_H = 11;           /* breakfast sold until ~11 AM */
 var PRESTART_MIN_PER_STOP = 16; /* pre-start pace guess */
 var ITEM_W = 0.7, STOP_W = 0.3; /* completion weighting */
 
 /* ---------------- state ---------------- */
-var state = JSON.parse(document.getElementById('STATE').textContent);
-var readOnly = false, artifactNS = null, soloMode = false;
-var pubTimer = null, pubBusy = false;
+function freshState() { return { names: DEFAULT_NAMES.slice(), start: null, items: {}, stops: {} }; }
+var state = freshState();
+var syncMode = DB_URL ? 'connecting' : 'solo';
+var tab = 'race', menuFilter = 'all', menuSearch = '';
 
-function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
-function ss(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) { return null; } }
+function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
+try { tab = sessionStorage.getItem('tdtb-tab') || 'race'; } catch (e) {}
+function saveTab() { try { sessionStorage.setItem('tdtb-tab', tab); } catch (e) {} }
 
 var me = parseInt(ls('tdtb-player'), 10); if (isNaN(me) || me < 0 || me > 4) me = -1;
-var tab = ss('tdtb-tab') || 'race';
-var menuFilter = 'all', menuSearch = '';
 
-/* pending ops survive the publish-reload cycle and merge onto the winner */
-function pendingGet() { try { return JSON.parse(ss('tdtb-pending') || '[]'); } catch (e) { return []; } }
-function pendingSet(ops) { ss('tdtb-pending', ops.length ? JSON.stringify(ops) : null); }
+/* normalize whatever the DB returns (nulls, arrays with holes) into the full shape */
+function normalize(raw) {
+  var st = freshState();
+  if (!raw || typeof raw !== 'object') return st;
+  if (raw.names) for (var i = 0; i < 5; i++) if (raw.names[i]) st.names[i] = String(raw.names[i]);
+  if (raw.start) st.start = raw.start;
+  var k;
+  if (raw.items && typeof raw.items === 'object') for (k in raw.items) if (raw.items[k]) st.items[k] = raw.items[k];
+  if (raw.stops && typeof raw.stops === 'object') for (k in raw.stops) if (raw.stops[k]) st.stops[k] = raw.stops[k];
+  return st;
+}
+
+/* ---------------- sync: Firebase RTDB over REST + SSE ---------------- */
+var queue = [];
+try { queue = JSON.parse(ls('tdtb-queue') || '[]'); } catch (e) { queue = []; }
+var sending = false, esRetry = 0;
+
+function saveQueue() { ls('tdtb-queue', queue.length ? JSON.stringify(queue) : null); }
+function saveSolo() { ls('tdtb-state', JSON.stringify(state)); }
 
 function applyOp(st, op) {
   if (op.k === 'item') { if (op.p === null) delete st.items[op.id]; else st.items[op.id] = { p: op.p, t: op.t }; }
   else if (op.k === 'stop') { if (op.s === null) delete st.stops[op.i]; else st.stops[op.i] = { s: op.s, t: op.t }; }
   else if (op.k === 'name') { st.names[op.i] = op.v; }
   else if (op.k === 'start') { if (!st.start) st.start = op.t; }
+  else if (op.k === 'reset') { var n = st.names; var f = freshState(); f.names = n; return f; }
   return st;
 }
 
-function dispatch(op) {
-  if (readOnly) return;
-  var ops = pendingGet(); ops.push(op); pendingSet(ops);
-  applyOp(state, op);
-  render();
-  schedulePublish();
+function opRequest(op) {
+  var base = DB_URL.replace(/\/$/, '') + DB_PATH;
+  if (op.k === 'item') return op.p === null
+    ? { m: 'DELETE', u: base + '/items/' + op.id + '.json' }
+    : { m: 'PUT', u: base + '/items/' + op.id + '.json', b: { p: op.p, t: op.t } };
+  if (op.k === 'stop') return op.s === null
+    ? { m: 'DELETE', u: base + '/stops/' + op.i + '.json' }
+    : { m: 'PUT', u: base + '/stops/' + op.i + '.json', b: { s: op.s, t: op.t } };
+  if (op.k === 'name') return { m: 'PUT', u: base + '/names/' + op.i + '.json', b: op.v };
+  if (op.k === 'start') return { m: 'PUT', u: base + '/start.json', b: op.t };
+  if (op.k === 'reset') return { m: 'PUT', u: base + '.json', b: { names: op.names } };
+  return null;
 }
 
-/* ---------------- self-publish ---------------- */
-function stateTag(st) {
-  var json = JSON.stringify(st).replace(/</g, '\\u003c');
-  return '<script id="STATE" type="application/json">' + json + '</scr' + 'ipt>';
+function pump() {
+  if (sending || !queue.length || syncMode === 'solo') return;
+  sending = true;
+  var op = queue[0], req = opRequest(op);
+  if (!req) { queue.shift(); saveQueue(); sending = false; pump(); return; }
+  fetch(req.u, { method: req.m, body: req.b === undefined ? undefined : JSON.stringify(req.b) })
+    .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); })
+    .then(function () {
+      queue.shift(); saveQueue(); sending = false;
+      if (syncMode === 'offline') { syncMode = 'live'; render(); } else setChip();
+      pump();
+    })
+    .catch(function () {
+      sending = false;
+      if (syncMode !== 'offline') { syncMode = 'offline'; render(); }
+      setTimeout(pump, 3000);
+    });
 }
-function buildDoc(st) {
-  return '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>Tour de Taco Bell</title>\n</head>\n<body>\n' +
-    stateTag(st) + '\n<script id="APP">' + APP_EL.textContent + '</scr' + 'ipt>\n</body>\n</html>';
+
+function dispatch(op) {
+  state = applyOp(state, op);
+  if (syncMode === 'solo') saveSolo();
+  else { if (op.k === 'reset') { op.names = state.names.slice(); queue = []; } queue.push(op); saveQueue(); pump(); }
+  render();
 }
-function schedulePublish() {
-  if (soloMode) { ls('tdtb-solo-state', JSON.stringify(state)); pendingSet([]); return; }
-  if (pubTimer) clearTimeout(pubTimer);
-  pubTimer = setTimeout(doPublish, 700);
+
+function setAtPath(path, data) {
+  var segs = path.split('/').filter(Boolean);
+  if (!segs.length) { state = normalize(data); return; }
+  /* rebuild a raw copy, set, renormalize — keeps array/object coercion sane */
+  var raw = JSON.parse(JSON.stringify(state));
+  var node = raw;
+  for (var i = 0; i < segs.length - 1; i++) {
+    if (typeof node[segs[i]] !== 'object' || node[segs[i]] === null) node[segs[i]] = {};
+    node = node[segs[i]];
+  }
+  var last = segs[segs.length - 1];
+  if (data === null) delete node[last]; else node[last] = data;
+  state = normalize(raw);
 }
-function doPublish() {
-  pubTimer = null;
-  if (pubBusy || readOnly || !artifactNS) return;
-  pubBusy = true;
-  setSyncChip('saving');
-  ss('tdtb-tab', tab);
-  artifactNS.publish(buildDoc(state)).then(function () {
-    pendingSet([]);            /* published — nothing left to replay */
-    setSyncChip('saved');      /* this view reloads momentarily */
-  }).catch(function (err) {
-    pubBusy = false;
-    var code = err && err.code;
-    if (code === 'conflict') { setSyncChip('sync'); /* reload delivers winner; pending replays on load */ }
-    else if (code === 'not_writer' || code === 'not_granted' || code === 'not_declared' || code === 'consent_required') {
-      readOnly = true; pendingSet([]); setSyncChip('readonly'); render();
-    } else if (code === 'rate_limited') { setSyncChip('waiting'); pubTimer = setTimeout(doPublish, 4000); }
-    else { setSyncChip('retry'); pubTimer = setTimeout(doPublish, 1500 + Math.random() * 1500); }
+
+function connectStream() {
+  if (!DB_URL) return;
+  var es;
+  try { es = new EventSource(DB_URL.replace(/\/$/, '') + DB_PATH + '.json'); }
+  catch (e) { syncMode = 'offline'; render(); return; }
+  es.addEventListener('put', function (ev) {
+    var d = JSON.parse(ev.data);
+    setAtPath(d.path, d.data);
+    esRetry = 0;
+    if (syncMode !== 'live') syncMode = 'live';
+    render();
   });
+  es.addEventListener('patch', function (ev) {
+    var d = JSON.parse(ev.data);
+    for (var k in d.data) setAtPath(d.path.replace(/\/$/, '') + '/' + k, d.data[k]);
+    render();
+  });
+  es.onerror = function () {
+    es.close();
+    if (syncMode !== 'offline') { syncMode = 'offline'; render(); }
+    esRetry = Math.min(esRetry + 1, 5);
+    setTimeout(connectStream, 1000 * Math.pow(2, esRetry));
+  };
 }
 
 /* ---------------- derived ---------------- */
@@ -290,11 +365,11 @@ function isRaceMorning() {
 function mapsUrl(i) { return 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent('Taco Bell, ' + STOPS[i][0] + ', ' + STOPS[i][1].replace(/\s*\(.*\)/, '').replace(/·.*/, '')); }
 function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
-/* ---------------- styles + shell ---------------- */
+/* ---------------- styles ---------------- */
 var CSS = [
 '*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}',
 'html{-webkit-text-size-adjust:100%}',
-':root{--bg:#1B0B26;--surface:#2A1140;--surface2:#3A1B55;--line:#4A2668;--ink:#FCEFF7;--muted:#B99CD1;--pink:#FF3D9A;--teal:#3EE8D2;--gold:#FFC53D;--good:#8FE85C}',
+':root{--bg:#1B0B26;--surface:#2A1140;--surface2:#3A1B55;--line:#4A2668;--ink:#FCEFF7;--muted:#B99CD1;--pink:#FF3D9A;--teal:#3EE8D2;--gold:#FFC53D;--good:#8FE85C;--danger:#FF5C5C}',
 'body{background:var(--bg);color:var(--ink);font-family:Rubik,system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.45;min-height:100vh;padding-bottom:calc(76px + env(safe-area-inset-bottom))}',
 '.disp{font-family:Anton,Impact,"Arial Narrow",sans-serif;font-weight:400;letter-spacing:.02em;text-transform:uppercase}',
 '.num{font-variant-numeric:tabular-nums}',
@@ -302,7 +377,7 @@ var CSS = [
 '.hdr-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px}',
 '.wordmark{font-size:20px;color:var(--ink)}.wordmark em{font-style:normal;color:var(--pink)}',
 '.sync{font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}',
-'.sync.saving{color:var(--gold)}.sync.readonly{color:var(--pink)}',
+'.sync.live{color:var(--good)}.sync.offline{color:var(--danger)}.sync.solo{color:var(--gold)}',
 '.hdr-bar{margin-top:8px;height:6px;border-radius:3px;background:var(--surface2);overflow:hidden}',
 '.hdr-bar>i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--pink),var(--gold));transition:width .4s ease}',
 '@media (prefers-reduced-motion:reduce){.hdr-bar>i,.ringfg{transition:none!important}}',
@@ -330,9 +405,9 @@ var CSS = [
 '.btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:var(--surface2);color:var(--ink);border-radius:10px;padding:10px 14px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit}',
 '.btn:focus-visible,.navbtn:focus-visible,.tabbtn:focus-visible,.itemrow:focus-visible{outline:2px solid var(--teal);outline-offset:2px}',
 '.btn.primary{background:var(--pink);border-color:var(--pink);color:#fff}',
+'.btn.danger{background:transparent;border-color:#6b2430;color:var(--danger)}',
 '.kv{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:14px}.kv:last-child{border-bottom:0}',
 '.kv .k{color:var(--muted)}',
-/* menu */
 '.filters{display:flex;gap:8px;margin-bottom:12px;position:sticky;top:64px;z-index:10;background:var(--bg);padding:6px 0}',
 '.fbtn{flex:0 0 auto;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted);padding:7px 14px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}',
 '.fbtn.on{background:var(--pink);border-color:var(--pink);color:#fff}',
@@ -346,7 +421,6 @@ var CSS = [
 '.itemrow .cal{flex:0 0 auto;font-size:13px;color:var(--muted)}',
 '.pchip{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#1B0B26}',
 '.tick{flex:0 0 auto;width:26px;height:26px;border-radius:50%;border:2px dashed var(--line)}',
-/* route */
 '.strip{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}',
 '.dot{width:calc((100% - 45px)/10);aspect-ratio:1;border-radius:6px;background:var(--surface2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted)}',
 '.dot.done{background:var(--teal);border-color:var(--teal);color:#06251f;font-weight:700}',
@@ -362,7 +436,6 @@ var CSS = [
 '.sbtn.done-on{background:var(--teal);border-color:var(--teal);color:#06251f}',
 '.sbtn.skip-btn{font-size:11px;color:var(--muted);font-weight:500;padding:4px 12px}',
 '.maplink{color:var(--teal);font-size:12px;text-decoration:none}',
-/* squad */
 '.pcard{border-radius:14px;padding:14px;margin-bottom:12px;background:var(--surface);border:1px solid var(--line);border-left:5px solid}',
 '.prow1{display:flex;align-items:center;gap:8px;margin-bottom:8px}',
 '.pname{font-size:18px}.jersey{margin-left:auto;font-size:11px;background:#4a3308;color:var(--gold);border:1px solid #6b4c10;border-radius:999px;padding:3px 9px;font-weight:700}',
@@ -371,7 +444,6 @@ var CSS = [
 '.macros{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}',
 '.macros .mv{font-size:17px}.macros .mk{font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}',
 '.pbar{height:5px;border-radius:3px;background:var(--surface2);margin-top:10px;overflow:hidden}.pbar>i{display:block;height:100%}',
-/* sheet */
 '.overlay{position:fixed;inset:0;background:rgba(10,3,17,.7);z-index:40;display:flex;align-items:flex-end;justify-content:center}',
 '.sheet{width:100%;max-width:560px;background:var(--surface);border-radius:18px 18px 0 0;border:1px solid var(--line);border-bottom:0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}',
 '.sheet h3{font-size:18px;margin-bottom:2px}.sheet .sub{color:var(--muted);font-size:13px;margin-bottom:14px}',
@@ -381,42 +453,41 @@ var CSS = [
 '.sheet .row2{display:flex;gap:8px;margin-top:10px}',
 '.sheet .row2 .btn{flex:1}',
 '.namein{width:100%;background:var(--surface2);border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:12px;font-size:18px;font-family:inherit;margin-bottom:12px}',
-/* tabs */
 'nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:#160821;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}',
 '.tabbtn{flex:1;background:none;border:0;color:var(--muted);padding:10px 4px 8px;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}',
 '.tabbtn .ic{font-size:18px;line-height:1}.tabbtn .lb{font-size:10px;letter-spacing:.08em;text-transform:uppercase}',
 '.tabbtn.on{color:var(--ink)}.tabbtn.on .lb{color:var(--pink)}',
 '.banner{background:#4a1030;border:1px solid var(--pink);color:var(--ink);border-radius:12px;padding:10px 12px;font-size:13px;margin-bottom:12px}',
-'.finish-note{text-align:center;color:var(--muted);font-size:12px;margin:16px 0 4px}'
+'.finish-note{text-align:center;color:var(--muted);font-size:12px;margin:16px 0 4px}',
+'.resetwrap{text-align:center;margin:20px 0 8px}'
 ].join('\n');
 
-document.head.insertAdjacentHTML('beforeend',
-  '<link rel="preconnect" href="https://fonts.googleapis.com">' +
-  '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Rubik:wght@400;500;700&display=swap">' +
-  '<style>' + CSS + '</style>');
-
-var root = document.createElement('div');
-document.body.appendChild(root);
+var styleEl = document.createElement('style');
+styleEl.textContent = CSS;
+document.head.appendChild(styleEl);
+var root = document.getElementById('root');
 
 /* ---------------- rendering ---------------- */
-function setSyncChip(mode) {
+function chipText() {
+  if (syncMode === 'solo') return 'solo · no sync';
+  if (syncMode === 'live') return queue.length ? 'saving…' : 'live';
+  if (syncMode === 'offline') return 'offline · retrying';
+  return 'connecting…';
+}
+function setChip() {
   var el = document.getElementById('syncchip'); if (!el) return;
-  el.className = 'sync ' + (mode === 'saving' ? 'saving' : mode === 'readonly' ? 'readonly' : '');
-  el.textContent = mode === 'saving' ? 'saving…' : mode === 'saved' ? 'saved' :
-    mode === 'readonly' ? 'read-only' : mode === 'waiting' ? 'slow down…' :
-    mode === 'retry' ? 'retrying…' : mode === 'solo' ? 'solo mode' :
-    mode === 'sync' ? 'syncing…' : 'live';
+  el.className = 'sync ' + syncMode;
+  el.textContent = chipText();
 }
 
 function render() {
   var pct = overallPct();
   var html = '';
   html += '<header><div class="hdr-row"><div class="wordmark disp">Tour de <em>Taco Bell</em></div>' +
-    '<span id="syncchip" class="sync">live</span></div>' +
+    '<span id="syncchip" class="sync ' + syncMode + '">' + chipText() + '</span></div>' +
     '<div class="hdr-bar"><i style="width:' + pct + '%"></i></div></header>';
   html += '<main>';
-  if (readOnly) html += '<div class="banner">This view is read-only. Ask Wyatt to share the artifact with edit access so your taps count.</div>';
-  if (soloMode) html += '<div class="banner">Solo mode: no live sync here, progress saves to this phone only.</div>';
+  if (syncMode === 'solo') html += '<div class="banner">Solo mode: progress saves to this phone only. Live team sync turns on once the database is wired up.</div>';
   if (tab === 'race') html += renderRace(pct);
   else if (tab === 'menu') html += renderMenu();
   else if (tab === 'route') html += renderRoute();
@@ -479,6 +550,7 @@ function renderRace(pct) {
     '<div class="pbar"><i style="width:' + Math.min(100, Math.round(calEaten / calAll * 100)) + '%;background:linear-gradient(90deg,var(--teal),var(--gold))"></i></div>' +
     '</div>';
   h += '<div class="finish-note">Sunday 8/30 · 30 stages · 111 items · 5 riders · finish: 168th &amp; Maple</div>';
+  h += '<div class="resetwrap"><button class="btn danger" id="resetbtn">Reset race data</button></div>';
   return h;
 }
 
@@ -599,7 +671,7 @@ function openEatSheet(id) {
 
 function openRenameSheet(p) {
   var h = '<div class="overlay" id="overlay"><div class="sheet">' +
-    '<h3>Rename rider</h3><div class="sub">Jersey stays ' + '<span style="color:' + JERSEYS[p] + '">●</span></div>' +
+    '<h3>Rename rider</h3><div class="sub">Jersey stays <span style="color:' + JERSEYS[p] + '">●</span></div>' +
     '<input class="namein" id="namein" value="' + esc(state.names[p]) + '" maxlength="14">' +
     '<div class="row2"><button class="btn primary" id="savename">Save</button><button class="btn" id="closesheet">Cancel</button></div>' +
     '</div></div>';
@@ -616,17 +688,32 @@ function openRenameSheet(p) {
   });
 }
 
+function openResetSheet() {
+  var h = '<div class="overlay" id="overlay"><div class="sheet">' +
+    '<h3>Reset race data?</h3>' +
+    '<div class="sub">Wipes all eaten items, stop check-ins, and the race clock' + (syncMode === 'solo' ? ' on this phone' : ' for EVERYONE') + '. Rider names stay. No undo.</div>' +
+    '<div class="row2"><button class="btn danger" id="confirmreset">Yes, reset everything</button><button class="btn" id="closesheet">Cancel</button></div>' +
+    '</div></div>';
+  document.body.insertAdjacentHTML('beforeend', h);
+  var ov = document.getElementById('overlay');
+  ov.addEventListener('click', function (ev) {
+    if (ev.target === ov || ev.target.id === 'closesheet') { ov.remove(); return; }
+    if (ev.target.id === 'confirmreset') { dispatch({ k: 'reset' }); ov.remove(); }
+  });
+}
+
 /* ---------------- events ---------------- */
 function wire() {
   root.querySelectorAll('[data-tab]').forEach(function (b) {
-    b.addEventListener('click', function () { tab = b.getAttribute('data-tab'); ss('tdtb-tab', tab); render(); window.scrollTo(0, 0); });
+    b.addEventListener('click', function () { tab = b.getAttribute('data-tab'); saveTab(); render(); window.scrollTo(0, 0); });
   });
   var sb = document.getElementById('startbtn');
   if (sb) sb.addEventListener('click', function () { dispatch({ k: 'start', t: Date.now() }); });
+  var rb = document.getElementById('resetbtn');
+  if (rb) rb.addEventListener('click', openResetSheet);
   var msearch = document.getElementById('menusearch');
   if (msearch) msearch.addEventListener('input', function () {
     menuSearch = msearch.value;
-    /* re-render list only, keep input focus */
     var keep = msearch.value;
     render();
     var again = document.getElementById('menusearch');
@@ -636,11 +723,10 @@ function wire() {
     b.addEventListener('click', function () { menuFilter = b.getAttribute('data-filter'); render(); });
   });
   root.querySelectorAll('[data-item]').forEach(function (b) {
-    b.addEventListener('click', function () { if (!readOnly) openEatSheet(b.getAttribute('data-item')); });
+    b.addEventListener('click', function () { openEatSheet(b.getAttribute('data-item')); });
   });
   root.querySelectorAll('[data-stopdone]').forEach(function (b) {
     b.addEventListener('click', function () {
-      if (readOnly) return;
       var i = parseInt(b.getAttribute('data-stopdone'), 10);
       var cur = state.stops[i];
       if (cur && cur.s === 'done') dispatch({ k: 'stop', i: i, s: null, t: Date.now() });
@@ -649,7 +735,6 @@ function wire() {
   });
   root.querySelectorAll('[data-stopskip]').forEach(function (b) {
     b.addEventListener('click', function () {
-      if (readOnly) return;
       var i = parseInt(b.getAttribute('data-stopskip'), 10);
       var cur = state.stops[i];
       if (cur && cur.s === 'skip') dispatch({ k: 'stop', i: i, s: null, t: Date.now() });
@@ -660,35 +745,22 @@ function wire() {
     b.addEventListener('click', function () { me = parseInt(b.getAttribute('data-me'), 10); ls('tdtb-player', String(me)); render(); });
   });
   root.querySelectorAll('[data-rename]').forEach(function (b) {
-    b.addEventListener('click', function () { if (!readOnly) openRenameSheet(parseInt(b.getAttribute('data-rename'), 10)); });
+    b.addEventListener('click', function () { openRenameSheet(parseInt(b.getAttribute('data-rename'), 10)); });
   });
 }
 
 /* ---------------- boot ---------------- */
+if (syncMode === 'solo') {
+  try { var saved = ls('tdtb-state'); if (saved) state = normalize(JSON.parse(saved)); } catch (e) {}
+} else {
+  connectStream();
+  pump();
+}
 render();
-
-/* replay any ops that were pending when a reload interrupted us */
-(function replayPending() {
-  var ops = pendingGet();
-  if (!ops.length) return;
-  var before = JSON.stringify(state);
-  ops.forEach(function (op) { applyOp(state, op); });
-  if (JSON.stringify(state) !== before) { render(); schedulePublish(); }
-  else pendingSet([]);
-})();
 
 /* live ETA refresh */
 setInterval(function () { if (tab === 'race' && !document.getElementById('overlay')) render(); }, 60000);
-
-if (window.claude && typeof window.claude.use === 'function') {
-  window.claude.use('artifact').then(function (ns) {
-    if (ns) { artifactNS = ns; setSyncChip('live'); if (pendingGet().length) schedulePublish(); }
-    else { soloMode = true; var saved = ls('tdtb-solo-state'); if (saved) { try { state = JSON.parse(saved); } catch (e) {} } setSyncChip('solo'); render(); }
-  });
-} else {
-  soloMode = true;
-  var saved = ls('tdtb-solo-state'); if (saved) { try { state = JSON.parse(saved); } catch (e) {} }
-  setSyncChip('solo'); render();
-}
 })();
 </script>
+</body>
+</html>
