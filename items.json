@@ -1,0 +1,668 @@
+[
+ {
+  "id": "breakfast-california-crunchwrap-bacon",
+  "cat": "Breakfast",
+  "name": "Breakfast California Crunchwrap - Bacon",
+  "variant": null
+ },
+ {
+  "id": "breakfast-crunchwrap-bacon",
+  "cat": "Breakfast",
+  "name": "Breakfast Crunchwrap - Bacon",
+  "variant": null
+ },
+ {
+  "id": "breakfast-crunchwrap-sausage-patty",
+  "cat": "Breakfast",
+  "name": "Breakfast Crunchwrap - Sausage Patty",
+  "variant": null
+ },
+ {
+  "id": "breakfast-quesadilla-bacon",
+  "cat": "Breakfast",
+  "name": "Breakfast Quesadilla - Bacon",
+  "variant": null
+ },
+ {
+  "id": "breakfast-quesadilla-sausage",
+  "cat": "Breakfast",
+  "name": "Breakfast Quesadilla - Sausage",
+  "variant": null
+ },
+ {
+  "id": "breakfast-quesadilla-steak",
+  "cat": "Breakfast",
+  "name": "Breakfast Quesadilla - Steak",
+  "variant": null
+ },
+ {
+  "id": "breakfast-salsa-packet",
+  "cat": "Breakfast",
+  "name": "Breakfast Salsa Packet",
+  "variant": null
+ },
+ {
+  "id": "cheesy-toasted-breakfast-burrito-bacon",
+  "cat": "Breakfast",
+  "name": "Cheesy Toasted Breakfast Burrito - Bacon",
+  "variant": null
+ },
+ {
+  "id": "cheesy-toasted-breakfast-burrito-fiesta-potato",
+  "cat": "Breakfast",
+  "name": "Cheesy Toasted Breakfast Burrito - Fiesta Potato",
+  "variant": null
+ },
+ {
+  "id": "cheesy-toasted-breakfast-burrito-sausage",
+  "cat": "Breakfast",
+  "name": "Cheesy Toasted Breakfast Burrito - Sausage",
+  "variant": null
+ },
+ {
+  "id": "grande-toasted-breakfast-burrito-bacon",
+  "cat": "Breakfast",
+  "name": "Grande Toasted Breakfast Burrito - Bacon",
+  "variant": null
+ },
+ {
+  "id": "grande-toasted-breakfast-burrito-sausage",
+  "cat": "Breakfast",
+  "name": "Grande Toasted Breakfast Burrito - Sausage",
+  "variant": null
+ },
+ {
+  "id": "grande-toasted-breakfast-burrito-steak",
+  "cat": "Breakfast",
+  "name": "Grande Toasted Breakfast Burrito - Steak",
+  "variant": null
+ },
+ {
+  "id": "bean-burrito",
+  "cat": "Burritos",
+  "name": "Bean Burrito",
+  "variant": null
+ },
+ {
+  "id": "beefy-5-layer-burrito",
+  "cat": "Burritos",
+  "name": "Beefy 5-Layer Burrito",
+  "variant": null
+ },
+ {
+  "id": "black-bean-grilled-cheese-burrito",
+  "cat": "Burritos",
+  "name": "Black Bean Grilled Cheese Burrito",
+  "variant": null
+ },
+ {
+  "id": "burrito-supreme-beef",
+  "cat": "Burritos",
+  "name": "Burrito Supreme® - Beef",
+  "variant": null
+ },
+ {
+  "id": "cheesy-bean-rice-burrito",
+  "cat": "Burritos",
+  "name": "Cheesy Bean & Rice Burrito",
+  "variant": null
+ },
+ {
+  "id": "cheesy-double-beef-burrito",
+  "cat": "Burritos",
+  "name": "Cheesy Double Beef Burrito",
+  "variant": null
+ },
+ {
+  "id": "grilled-cheese-burrito",
+  "cat": "Burritos",
+  "name": "Grilled Cheese Burrito",
+  "variant": null
+ },
+ {
+  "id": "avocado-salsa-verde-packet",
+  "cat": "Cantina Chicken Menu",
+  "name": "Avocado Salsa Verde Packet",
+  "variant": null
+ },
+ {
+  "id": "cantina-chicken-bowl",
+  "cat": "Cantina Chicken Menu",
+  "name": "Cantina Chicken Bowl",
+  "variant": null
+ },
+ {
+  "id": "cantina-chicken-burrito",
+  "cat": "Cantina Chicken Menu",
+  "name": "Cantina Chicken Burrito",
+  "variant": null
+ },
+ {
+  "id": "cantina-chicken-crispy-taco",
+  "cat": "Cantina Chicken Menu",
+  "name": "Cantina Chicken Crispy Taco",
+  "variant": null
+ },
+ {
+  "id": "cantina-chicken-rolled-quesadilla",
+  "cat": "Cantina Chicken Menu",
+  "name": "Cantina Chicken Rolled Quesadilla",
+  "variant": null
+ },
+ {
+  "id": "cantina-chicken-soft-taco",
+  "cat": "Cantina Chicken Menu",
+  "name": "Cantina Chicken Soft Taco",
+  "variant": null
+ },
+ {
+  "id": "jalapeno-citrus-salsa-packet",
+  "cat": "Cantina Chicken Menu",
+  "name": "Jalapeno Citrus Salsa packet",
+  "variant": null
+ },
+ {
+  "id": "mtn-dew-baja-blasttm-dirty-soda",
+  "cat": "Dirty Sodas",
+  "name": "Mtn Dew® Baja Blast™ Dirty Soda",
+  "variant": null
+ },
+ {
+  "id": "mtn-dew-baja-blasttm-dirty-soda-freeze",
+  "cat": "Dirty Sodas",
+  "name": "Mtn Dew® Baja Blast™ Dirty Soda Freeze",
+  "variant": null
+ },
+ {
+  "id": "mtn-dew-baja-blasttm-zero-sugar-dirty-soda",
+  "cat": "Dirty Sodas",
+  "name": "Mtn Dew® Baja Blast™ Zero Sugar Dirty Soda",
+  "variant": null
+ },
+ {
+  "id": "mtn-dew-baja-midnight-dirty-soda",
+  "cat": "Dirty Sodas",
+  "name": "Mtn Dew® Baja Midnight Dirty Soda",
+  "variant": null
+ },
+ {
+  "id": "pepsi-dirty-soda",
+  "cat": "Dirty Sodas",
+  "name": "Pepsi® Dirty Soda",
+  "variant": null
+ },
+ {
+  "id": "tropicana-dirty-lemonade",
+  "cat": "Dirty Sodas",
+  "name": "Tropicana® Dirty Lemonade",
+  "variant": null
+ },
+ {
+  "id": "cinnabon-delightstm-coffee-hot",
+  "cat": "Drinks",
+  "name": "Cinnabon® Delights™ Coffee",
+  "variant": "hot"
+ },
+ {
+  "id": "cinnabon-delightstm-coffee-iced",
+  "cat": "Drinks",
+  "name": "Cinnabon® Delights™ Coffee",
+  "variant": "iced"
+ },
+ {
+  "id": "coffee-with-creamer-hot",
+  "cat": "Drinks",
+  "name": "Coffee with Creamer",
+  "variant": "hot"
+ },
+ {
+  "id": "coffee-with-creamer-iced",
+  "cat": "Drinks",
+  "name": "Coffee with Creamer",
+  "variant": "iced"
+ },
+ {
+  "id": "mtn-dew-baja-blast-freezetm",
+  "cat": "Drinks",
+  "name": "Mtn Dew® Baja Blast Freeze™",
+  "variant": null
+ },
+ {
+  "id": "orange-juice",
+  "cat": "Drinks",
+  "name": "Orange Juice",
+  "variant": null
+ },
+ {
+  "id": "water",
+  "cat": "Drinks",
+  "name": "Water",
+  "variant": null
+ },
+ {
+  "id": "strawberry-passionfruit-agua-refresca",
+  "cat": "Drinks",
+  "name": "Strawberry Passionfruit Agua Refresca",
+  "variant": null
+ },
+ {
+  "id": "mango-peach-agua-refresca",
+  "cat": "Drinks",
+  "name": "Mango Peach Agua Refresca",
+  "variant": null
+ },
+ {
+  "id": "dragonfruit-berry-agua-refresca",
+  "cat": "Drinks",
+  "name": "Dragonfruit Berry Agua Refresca",
+  "variant": null
+ },
+ {
+  "id": "tropical-punch-rockstar-energy-refresca",
+  "cat": "Drinks",
+  "name": "Tropical Punch Rockstar Energy Refresca",
+  "variant": null
+ },
+ {
+  "id": "pineapple-lime-rockstar-energy-refresca",
+  "cat": "Drinks",
+  "name": "Pineapple Lime Rockstar Energy Refresca",
+  "variant": null
+ },
+ {
+  "id": "brisk-mango-iced-tea",
+  "cat": "Fountain Beverages",
+  "name": "Brisk® Mango Iced Tea",
+  "variant": null
+ },
+ {
+  "id": "diet-pepsi",
+  "cat": "Fountain Beverages",
+  "name": "Diet Pepsi®",
+  "variant": null
+ },
+ {
+  "id": "dr-pepper",
+  "cat": "Fountain Beverages",
+  "name": "Dr Pepper®",
+  "variant": null
+ },
+ {
+  "id": "g2-fruit-punch",
+  "cat": "Fountain Beverages",
+  "name": "G2 - Fruit Punch",
+  "variant": null
+ },
+ {
+  "id": "lipton-unsweetened-iced-tea",
+  "cat": "Fountain Beverages",
+  "name": "Lipton Unsweetened Iced Tea",
+  "variant": null
+ },
+ {
+  "id": "lipton-sweet-tea",
+  "cat": "Fountain Beverages",
+  "name": "Lipton Sweet Tea",
+  "variant": null
+ },
+ {
+  "id": "midnight-mtn-dew-baja-blasttm",
+  "cat": "Fountain Beverages",
+  "name": "Midnight Mtn Dew® Baja Blast™",
+  "variant": null
+ },
+ {
+  "id": "wild-strawberry-freeze",
+  "cat": "Fountain Beverages",
+  "name": "Wild Strawberry Freeze",
+  "variant": null
+ },
+ {
+  "id": "mtn-dew",
+  "cat": "Fountain Beverages",
+  "name": "Mtn Dew®",
+  "variant": null
+ },
+ {
+  "id": "mtn-dew-baja-blast-zero-sugar",
+  "cat": "Fountain Beverages",
+  "name": "Mtn Dew® Baja Blast Zero Sugar",
+  "variant": null
+ },
+ {
+  "id": "mtn-dew-baja-blasttm",
+  "cat": "Fountain Beverages",
+  "name": "Mtn Dew® Baja Blast™",
+  "variant": null
+ },
+ {
+  "id": "mtn-dew-zero-sugar",
+  "cat": "Fountain Beverages",
+  "name": "Mtn Dew® Zero Sugar",
+  "variant": null
+ },
+ {
+  "id": "mug-root-beer",
+  "cat": "Fountain Beverages",
+  "name": "Mug® Root Beer",
+  "variant": null
+ },
+ {
+  "id": "pepsi",
+  "cat": "Fountain Beverages",
+  "name": "Pepsi®",
+  "variant": null
+ },
+ {
+  "id": "pepsi-zero-sugar",
+  "cat": "Fountain Beverages",
+  "name": "Pepsi® Zero Sugar",
+  "variant": null
+ },
+ {
+  "id": "starry",
+  "cat": "Fountain Beverages",
+  "name": "Starry®",
+  "variant": null
+ },
+ {
+  "id": "tropicana-original-lemonade",
+  "cat": "Fountain Beverages",
+  "name": "Tropicana Original Lemonade",
+  "variant": null
+ },
+ {
+  "id": "avocado-ranch-chicken-stacker",
+  "cat": "Luxe Value Menu",
+  "name": "Avocado Ranch Chicken Stacker",
+  "variant": null
+ },
+ {
+  "id": "beefy-potato-loaded-griller",
+  "cat": "Luxe Value Menu",
+  "name": "Beefy Potato Loaded Griller",
+  "variant": null
+ },
+ {
+  "id": "chips-and-nacho-supreme-dip",
+  "cat": "Luxe Value Menu",
+  "name": "Chips and Nacho Supreme Dip",
+  "variant": null
+ },
+ {
+  "id": "mini-taco-salad",
+  "cat": "Luxe Value Menu",
+  "name": "Mini Taco Salad",
+  "variant": null
+ },
+ {
+  "id": "chips-and-nacho-cheese-sauce",
+  "cat": "Nachos",
+  "name": "Chips and Nacho Cheese Sauce",
+  "variant": null
+ },
+ {
+  "id": "chips-and-guacamole",
+  "cat": "Nachos",
+  "name": "Chips and Guacamole",
+  "variant": null
+ },
+ {
+  "id": "nachos-bellgrande-beef",
+  "cat": "Nachos",
+  "name": "Nachos BellGrande® - Beef",
+  "variant": null
+ },
+ {
+  "id": "crispy-chicken-burrito-avocado-ranch",
+  "cat": "New",
+  "name": "Crispy Chicken Burrito - Avocado Ranch",
+  "variant": null
+ },
+ {
+  "id": "crispy-chicken-chipotle-bacon-melt-burrito",
+  "cat": "New",
+  "name": "Crispy Chicken Chipotle Bacon Melt Burrito",
+  "variant": null
+ },
+ {
+  "id": "crispy-chicken-strips-2-pc-4-pc",
+  "cat": "New",
+  "name": "Crispy Chicken Strips",
+  "variant": "2 pc / 4 pc"
+ },
+ {
+  "id": "crispy-chicken-taco-avocado-ranch",
+  "cat": "New",
+  "name": "Crispy Chicken Taco - Avocado Ranch",
+  "variant": null
+ },
+ {
+  "id": "fresca-pepper-jack-steak-burrito",
+  "cat": "New",
+  "name": "Fresca Pepper Jack Steak Burrito",
+  "variant": null
+ },
+ {
+  "id": "melty-pepper-jack-steak-burrito",
+  "cat": "New",
+  "name": "Melty Pepper Jack Steak Burrito",
+  "variant": null
+ },
+ {
+  "id": "pepper-jack-steak-nacho-fries",
+  "cat": "New",
+  "name": "Pepper Jack Steak Nacho Fries",
+  "variant": null
+ },
+ {
+  "id": "pineapple-freezetm",
+  "cat": "New",
+  "name": "Pineapple Freeze™",
+  "variant": null
+ },
+ {
+  "id": "quesadilla-cheese",
+  "cat": "Quesadillas",
+  "name": "Quesadilla - Cheese",
+  "variant": null
+ },
+ {
+  "id": "quesadilla-chicken",
+  "cat": "Quesadillas",
+  "name": "Quesadilla - Chicken",
+  "variant": null
+ },
+ {
+  "id": "quesadilla-steak",
+  "cat": "Quesadillas",
+  "name": "Quesadilla - Steak",
+  "variant": null
+ },
+ {
+  "id": "black-beans",
+  "cat": "Sides & Sweets",
+  "name": "Black Beans",
+  "variant": null
+ },
+ {
+  "id": "black-beans-rice",
+  "cat": "Sides & Sweets",
+  "name": "Black Beans & Rice",
+  "variant": null
+ },
+ {
+  "id": "cheesy-fiesta-potatoes",
+  "cat": "Sides & Sweets",
+  "name": "Cheesy Fiesta Potatoes",
+  "variant": null
+ },
+ {
+  "id": "cinnabon-delightstm-2-pk-12-pk",
+  "cat": "Sides & Sweets",
+  "name": "Cinnabon® Delights™",
+  "variant": "2 pk / 12 pk"
+ },
+ {
+  "id": "cinnamon-twists",
+  "cat": "Sides & Sweets",
+  "name": "Cinnamon Twists",
+  "variant": null
+ },
+ {
+  "id": "diablo-sauce-packet",
+  "cat": "Sides & Sweets",
+  "name": "Diablo Sauce Packet",
+  "variant": null
+ },
+ {
+  "id": "fire-sauce-packet",
+  "cat": "Sides & Sweets",
+  "name": "Fire Sauce Packet",
+  "variant": null
+ },
+ {
+  "id": "hot-sauce-packet",
+  "cat": "Sides & Sweets",
+  "name": "Hot Sauce Packet",
+  "variant": null
+ },
+ {
+  "id": "mild-sauce-packet",
+  "cat": "Sides & Sweets",
+  "name": "Mild Sauce Packet",
+  "variant": null
+ },
+ {
+  "id": "nacho-fries-regular-large",
+  "cat": "Sides & Sweets",
+  "name": "Nacho Fries",
+  "variant": "regular / large"
+ },
+ {
+  "id": "pintos-n-cheese",
+  "cat": "Sides & Sweets",
+  "name": "Pintos N Cheese",
+  "variant": null
+ },
+ {
+  "id": "3-cheese-chicken-flatbread-melt",
+  "cat": "Specialties",
+  "name": "3-Cheese Chicken Flatbread Melt",
+  "variant": null
+ },
+ {
+  "id": "black-bean-crunchwrap-supreme",
+  "cat": "Specialties",
+  "name": "Black Bean Crunchwrap Supreme®",
+  "variant": null
+ },
+ {
+  "id": "cheesy-roll-up",
+  "cat": "Specialties",
+  "name": "Cheesy Roll Up",
+  "variant": null
+ },
+ {
+  "id": "crunchwrap-supreme",
+  "cat": "Specialties",
+  "name": "Crunchwrap Supreme®",
+  "variant": null
+ },
+ {
+  "id": "mexican-pizza",
+  "cat": "Specialties",
+  "name": "Mexican Pizza",
+  "variant": null
+ },
+ {
+  "id": "veggie-mexican-pizza",
+  "cat": "Specialties",
+  "name": "Veggie Mexican Pizza",
+  "variant": null
+ },
+ {
+  "id": "enchirito",
+  "cat": "Specialties",
+  "name": "Enchirito",
+  "variant": null
+ },
+ {
+  "id": "black-bean-chalupa-supreme",
+  "cat": "Tacos",
+  "name": "Black Bean Chalupa Supreme®",
+  "variant": null
+ },
+ {
+  "id": "chalupa-supreme-beef",
+  "cat": "Tacos",
+  "name": "Chalupa Supreme® - Beef",
+  "variant": null
+ },
+ {
+  "id": "cheesy-gordita-crunch",
+  "cat": "Tacos",
+  "name": "Cheesy Gordita Crunch",
+  "variant": null
+ },
+ {
+  "id": "crunchy-taco",
+  "cat": "Tacos",
+  "name": "Crunchy Taco",
+  "variant": null
+ },
+ {
+  "id": "crunchy-taco-supreme",
+  "cat": "Tacos",
+  "name": "Crunchy Taco Supreme®",
+  "variant": null
+ },
+ {
+  "id": "doritos-cheesy-gordita-crunch-nacho-cheese",
+  "cat": "Tacos",
+  "name": "Doritos® Cheesy Gordita Crunch - Nacho Cheese",
+  "variant": null
+ },
+ {
+  "id": "nacho-cheese-doritos-locos-taco",
+  "cat": "Tacos",
+  "name": "Nacho Cheese Doritos® Locos Taco",
+  "variant": null
+ },
+ {
+  "id": "nacho-cheese-doritos-locos-taco-supreme",
+  "cat": "Tacos",
+  "name": "Nacho Cheese Doritos® Locos Taco Supreme®",
+  "variant": null
+ },
+ {
+  "id": "soft-taco-beef",
+  "cat": "Tacos",
+  "name": "Soft Taco - Beef",
+  "variant": null
+ },
+ {
+  "id": "soft-taco-supreme-beef",
+  "cat": "Tacos",
+  "name": "Soft Taco Supreme® - Beef",
+  "variant": null
+ },
+ {
+  "id": "spicy-potato-soft-taco",
+  "cat": "Tacos",
+  "name": "Spicy Potato Soft Taco",
+  "variant": null
+ },
+ {
+  "id": "hash-brown",
+  "cat": "Breakfast",
+  "name": "Hash Brown",
+  "variant": null
+ },
+ {
+  "id": "veggie-bowl",
+  "cat": "Veggie Cravings",
+  "name": "Veggie Bowl",
+  "variant": null
+ }
+]

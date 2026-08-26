@@ -1,0 +1,694 @@
+<title>Tour de Taco Bell</title>
+<script id="STATE" type="application/json">{"v":1,"names":["Wyatt","Jack","Tyler","Alex","Ryan"],"start":null,"items":{},"stops":{}}</script>
+<script id="APP">
+(function () {
+'use strict';
+var APP_EL = document.currentScript;
+
+/* ---------------- static data ---------------- */
+/* [id, category, name, sizeNote, cal, protein, carbs, fat, est] — largest size everywhere */
+var ITEMS = [
+["bk-cal-cw-bacon","Breakfast","Breakfast California Crunchwrap - Bacon","",630,21,51,38,1],
+["bk-cw-bacon","Breakfast","Breakfast Crunchwrap - Bacon","",670,21,51,42,0],
+["bk-cw-sausage","Breakfast","Breakfast Crunchwrap - Sausage Patty","",720,21,50,47,0],
+["bk-q-bacon","Breakfast","Breakfast Quesadilla - Bacon","",510,19,38,31,0],
+["bk-q-sausage","Breakfast","Breakfast Quesadilla - Sausage","",560,19,38,36,0],
+["bk-q-steak","Breakfast","Breakfast Quesadilla - Steak","",520,22,38,29,0],
+["bk-salsa","Breakfast","Breakfast Salsa Packet","",5,0,1,0,0],
+["ctb-bacon","Breakfast","Cheesy Toasted Breakfast Burrito - Bacon","",340,13,34,17,0],
+["ctb-potato","Breakfast","Cheesy Toasted Breakfast Burrito - Fiesta Potato","",350,9,41,17,0],
+["ctb-sausage","Breakfast","Cheesy Toasted Breakfast Burrito - Sausage","",350,12,34,19,0],
+["gtb-bacon","Breakfast","Grande Toasted Breakfast Burrito - Bacon","",560,22,51,30,0],
+["gtb-sausage","Breakfast","Grande Toasted Breakfast Burrito - Sausage","",570,20,51,32,0],
+["gtb-steak","Breakfast","Grande Toasted Breakfast Burrito - Steak","",570,24,51,29,0],
+["hash-brown","Breakfast","Hash Brown","",160,1,15,11,0],
+["bean-burrito","Burritos","Bean Burrito","",350,13,54,9,0],
+["b5l","Burritos","Beefy 5-Layer Burrito","",490,18,63,18,0],
+["bb-gcb","Burritos","Black Bean Grilled Cheese Burrito","",690,17,82,31,1],
+["bs-beef","Burritos","Burrito Supreme® - Beef","",390,16,51,14,0],
+["cbr","Burritos","Cheesy Bean & Rice Burrito","",420,9,55,18,0],
+["cdb","Burritos","Cheesy Double Beef Burrito","",450,17,52,20,0],
+["gcb","Burritos","Grilled Cheese Burrito","",710,27,79,32,0],
+["av-verde","Cantina Chicken","Avocado Salsa Verde Packet","",25,0,1,2,1],
+["cc-bowl","Cantina Chicken","Cantina Chicken Bowl","",490,27,41,25,0],
+["cc-burrito","Cantina Chicken","Cantina Chicken Burrito","",490,24,50,22,0],
+["cc-crispy","Cantina Chicken","Cantina Chicken Crispy Taco","",260,12,18,15,0],
+["cc-rolled-q","Cantina Chicken","Cantina Chicken Rolled Quesadilla","",570,28,48,30,0],
+["cc-soft","Cantina Chicken","Cantina Chicken Soft Taco","",190,12,17,8,0],
+["jal-citrus","Cantina Chicken","Jalapeno Citrus Salsa Packet","",10,0,2,0,1],
+["ds-baja","Dirty Sodas","Mtn Dew® Baja Blast™ Dirty Soda","large",460,0,110,2,0],
+["ds-baja-freeze","Dirty Sodas","Mtn Dew® Baja Blast™ Dirty Soda Freeze","large",480,0,112,2,1],
+["ds-baja-zero","Dirty Sodas","Mtn Dew® Baja Blast™ Zero Sugar Dirty Soda","large",60,0,12,2,0],
+["ds-midnight","Dirty Sodas","Mtn Dew® Baja Midnight Dirty Soda","large",460,0,110,2,1],
+["ds-pepsi","Dirty Sodas","Pepsi® Dirty Soda","large",430,0,104,2,1],
+["ds-lemonade","Dirty Sodas","Tropicana® Dirty Lemonade","large",400,0,96,2,1],
+["cin-coffee-hot","Drinks","Cinnabon® Delights™ Coffee","hot · large",200,1,36,5,1],
+["cin-coffee-iced","Drinks","Cinnabon® Delights™ Coffee","iced · large",220,1,40,5,1],
+["coffee-hot","Drinks","Coffee with Creamer","hot · large",60,0,9,2,1],
+["coffee-iced","Drinks","Coffee with Creamer","iced · large",70,0,10,2,1],
+["baja-freeze","Drinks","Mtn Dew® Baja Blast Freeze™","large",320,0,86,0,1],
+["oj","Drinks","Orange Juice","",140,2,33,0,0],
+["water","Drinks","Water","",0,0,0,0,0],
+["ref-strawpass","Drinks","Strawberry Passionfruit Agua Refresca","large",180,0,46,0,1],
+["ref-mango","Drinks","Mango Peach Agua Refresca","large",180,0,46,0,1],
+["ref-dragon","Drinks","Dragonfruit Berry Agua Refresca","large",180,0,45,0,1],
+["ref-rock-punch","Drinks","Tropical Punch Rockstar Energy Refresca","large",210,0,52,0,1],
+["ref-rock-pine","Drinks","Pineapple Lime Rockstar Energy Refresca","large",210,0,52,0,1],
+["f-brisk","Fountain","Brisk® Mango Iced Tea","large",220,0,58,0,1],
+["f-diet-pepsi","Fountain","Diet Pepsi®","large",0,0,0,0,0],
+["f-drpepper","Fountain","Dr Pepper®","large",380,0,96,0,0],
+["f-g2","Fountain","G2 - Fruit Punch","large",160,0,42,0,1],
+["f-lipton-unsweet","Fountain","Lipton Unsweetened Iced Tea","large",0,0,0,0,0],
+["f-lipton-sweet","Fountain","Lipton Sweet Tea","large",240,0,63,0,1],
+["f-midnight","Fountain","Midnight Mtn Dew® Baja Blast™","large",420,0,108,0,1],
+["f-wild-straw","Fountain","Wild Strawberry Freeze","large",330,0,88,0,1],
+["f-dew","Fountain","Mtn Dew®","large",400,0,108,0,0],
+["f-baja-zero","Fountain","Mtn Dew® Baja Blast Zero Sugar","large",0,0,0,0,0],
+["f-baja","Fountain","Mtn Dew® Baja Blast™","large",420,0,110,0,0],
+["f-dew-zero","Fountain","Mtn Dew® Zero Sugar","large",10,0,1,0,0],
+["f-mug","Fountain","Mug® Root Beer","large",400,0,106,0,0],
+["f-pepsi","Fountain","Pepsi®","large",380,0,104,0,0],
+["f-pepsi-zero","Fountain","Pepsi® Zero Sugar","large",0,0,0,0,0],
+["f-starry","Fountain","Starry®","large",380,0,100,0,0],
+["f-trop-lemonade","Fountain","Tropicana Original Lemonade","large",400,0,102,0,1],
+["lx-stacker","Luxe Value","Avocado Ranch Chicken Stacker","",350,16,33,17,0],
+["lx-griller","Luxe Value","Beefy Potato Loaded Griller","",480,13,51,25,0],
+["lx-dip","Luxe Value","Chips and Nacho Supreme Dip","",400,8,38,24,1],
+["lx-salad","Luxe Value","Mini Taco Salad","",280,11,26,15,0],
+["n-chips-cheese","Nachos","Chips and Nacho Cheese Sauce","",220,3,24,13,0],
+["n-chips-guac","Nachos","Chips and Guacamole","",240,3,25,15,1],
+["n-bellgrande","Nachos","Nachos BellGrande® - Beef","",730,16,82,38,0],
+["cc-burr-ranch","New","Crispy Chicken Burrito - Avocado Ranch","",500,23,58,20,1],
+["cc-bacon-melt","New","Crispy Chicken Chipotle Bacon Melt Burrito","",700,31,60,37,1],
+["cc-strips","New","Crispy Chicken Strips","4 pc",470,29,39,22,0],
+["cc-taco-ranch","New","Crispy Chicken Taco - Avocado Ranch","",260,12,21,14,1],
+["pj-fresca","New","Fresca Pepper Jack Steak Burrito","",450,22,48,18,1],
+["pj-melty","New","Melty Pepper Jack Steak Burrito","",620,26,58,32,1],
+["pj-fries","New","Pepper Jack Steak Nacho Fries","",650,17,60,38,1],
+["pineapple-freeze","New","Pineapple Freeze™","large",320,0,84,0,1],
+["q-cheese","Quesadillas","Quesadilla - Cheese","",450,17,37,26,0],
+["q-chicken","Quesadillas","Quesadilla - Chicken","",510,26,38,27,0],
+["q-steak","Quesadillas","Quesadilla - Steak","",500,24,37,26,0],
+["s-black-beans","Sides & Sweets","Black Beans","",50,2,8,1,0],
+["s-bb-rice","Sides & Sweets","Black Beans & Rice","",170,4,28,4,0],
+["s-fiesta-pot","Sides & Sweets","Cheesy Fiesta Potatoes","",240,4,28,12,0],
+["s-cinnabon","Sides & Sweets","Cinnabon® Delights™","12 pk",930,9,93,57,0],
+["s-twists","Sides & Sweets","Cinnamon Twists","",170,1,27,6,0],
+["s-diablo","Sides & Sweets","Diablo Sauce Packet","",0,0,0,0,0],
+["s-fire","Sides & Sweets","Fire Sauce Packet","",0,0,0,0,0],
+["s-hot","Sides & Sweets","Hot Sauce Packet","",0,0,0,0,0],
+["s-mild","Sides & Sweets","Mild Sauce Packet","",0,0,0,0,0],
+["s-nacho-fries","Sides & Sweets","Nacho Fries","large",490,6,50,28,1],
+["s-pintos","Sides & Sweets","Pintos N Cheese","",180,9,19,7,0],
+["sp-flatbread","Specialties","3-Cheese Chicken Flatbread Melt","",390,21,30,20,0],
+["sp-bb-cws","Specialties","Black Bean Crunchwrap Supreme®","",510,13,77,16,0],
+["sp-rollup","Specialties","Cheesy Roll Up","",180,9,15,9,0],
+["sp-cws","Specialties","Crunchwrap Supreme®","",530,16,71,21,0],
+["sp-mex-pizza","Specialties","Mexican Pizza","",550,20,47,31,0],
+["sp-veg-pizza","Specialties","Veggie Mexican Pizza","",460,14,46,25,1],
+["sp-enchirito","Specialties","Enchirito","",360,18,33,17,0],
+["t-bb-chalupa","Tacos","Black Bean Chalupa Supreme®","",340,9,36,18,1],
+["t-chalupa-beef","Tacos","Chalupa Supreme® - Beef","",360,13,31,20,0],
+["t-cgc","Tacos","Cheesy Gordita Crunch","",500,20,41,28,0],
+["t-crunchy","Tacos","Crunchy Taco","",170,8,13,9,0],
+["t-crunchy-sup","Tacos","Crunchy Taco Supreme®","",190,8,15,11,0],
+["t-dcgc","Tacos","Doritos® Cheesy Gordita Crunch - Nacho Cheese","",510,20,42,29,1],
+["t-dlt","Tacos","Nacho Cheese Doritos® Locos Taco","",170,8,13,9,0],
+["t-dlt-sup","Tacos","Nacho Cheese Doritos® Locos Taco Supreme®","",190,8,15,11,0],
+["t-soft-beef","Tacos","Soft Taco - Beef","",180,9,18,8,0],
+["t-soft-sup","Tacos","Soft Taco Supreme® - Beef","",210,10,20,10,0],
+["t-spicy-potato","Tacos","Spicy Potato Soft Taco","",240,6,29,12,0],
+["veggie-bowl","Veggie Cravings","Veggie Bowl","",470,13,58,21,1]
+];
+
+var CAT_ORDER = ["Breakfast","Burritos","Cantina Chicken","Dirty Sodas","Drinks","Fountain","Luxe Value","Nachos","New","Quesadillas","Sides & Sweets","Specialties","Tacos","Veggie Cravings"];
+
+/* [address, city] in route order; last = the finish */
+var STOPS = [
+["318 E Broadway","Council Bluffs, IA"],
+["1114 Woodbury Ave","Council Bluffs, IA"],
+["3150 Dial Dr","Council Bluffs, IA"],
+["2759 W Broadway","Council Bluffs, IA"],
+["7516 N 30th St","Omaha (Florence)"],
+["6110 N 72nd St","Omaha"],
+["5139 N 90th St","Omaha"],
+["3211 N 108th St","Omaha"],
+["7051 Dodge St","Omaha (Midtown)"],
+["3855 Dodge St","Omaha (Midtown)"],
+["3917 S 42nd St","Omaha (South)"],
+["4801 L St","Omaha (South)"],
+["1506 Galvin Rd S","Bellevue"],
+["10110 S 15th St","Bellevue"],
+["4105 Twin Creek Dr","Bellevue"],
+["7710 Olson Dr","Papillion"],
+["8013 S 84th St","La Vista"],
+["4810 S 72nd St","Omaha (Ralston)"],
+["2812 S 84th St","Omaha"],
+["12075 W Center Rd","Omaha"],
+["14554 W Center Rd","Omaha"],
+["5310 S 108th St","Omaha (Millard)"],
+["13725 Q St","Omaha (Millard)"],
+["16845 Polk Plaza","Omaha"],
+["16116 Stevens Pointe Cir","Gretna"],
+["6601 S 205th St","Elkhorn"],
+["18370 Wright St","Omaha (West)"],
+["700 N 204th Ave Cir","Elkhorn"],
+["14606 W Maple Rd","Omaha"],
+["17130 Evans Plz","Omaha · 168th & Maple"]
+];
+
+var JERSEYS = ["#FF3D9A","#3EE8D2","#FFC53D","#8FE85C","#B08CFF"];
+var RACE_DAY = "2026-08-30";
+var BK_CUTOFF_H = 11;           /* breakfast sold until ~11 AM */
+var PRESTART_MIN_PER_STOP = 16; /* pre-start pace guess */
+var ITEM_W = 0.7, STOP_W = 0.3; /* completion weighting */
+
+/* ---------------- state ---------------- */
+var state = JSON.parse(document.getElementById('STATE').textContent);
+var readOnly = false, artifactNS = null, soloMode = false;
+var pubTimer = null, pubBusy = false;
+
+function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+function ss(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) { return null; } }
+
+var me = parseInt(ls('tdtb-player'), 10); if (isNaN(me) || me < 0 || me > 4) me = -1;
+var tab = ss('tdtb-tab') || 'race';
+var menuFilter = 'all', menuSearch = '';
+
+/* pending ops survive the publish-reload cycle and merge onto the winner */
+function pendingGet() { try { return JSON.parse(ss('tdtb-pending') || '[]'); } catch (e) { return []; } }
+function pendingSet(ops) { ss('tdtb-pending', ops.length ? JSON.stringify(ops) : null); }
+
+function applyOp(st, op) {
+  if (op.k === 'item') { if (op.p === null) delete st.items[op.id]; else st.items[op.id] = { p: op.p, t: op.t }; }
+  else if (op.k === 'stop') { if (op.s === null) delete st.stops[op.i]; else st.stops[op.i] = { s: op.s, t: op.t }; }
+  else if (op.k === 'name') { st.names[op.i] = op.v; }
+  else if (op.k === 'start') { if (!st.start) st.start = op.t; }
+  return st;
+}
+
+function dispatch(op) {
+  if (readOnly) return;
+  var ops = pendingGet(); ops.push(op); pendingSet(ops);
+  applyOp(state, op);
+  render();
+  schedulePublish();
+}
+
+/* ---------------- self-publish ---------------- */
+function stateTag(st) {
+  var json = JSON.stringify(st).replace(/</g, '\\u003c');
+  return '<script id="STATE" type="application/json">' + json + '</scr' + 'ipt>';
+}
+function buildDoc(st) {
+  return '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>Tour de Taco Bell</title>\n</head>\n<body>\n' +
+    stateTag(st) + '\n<script id="APP">' + APP_EL.textContent + '</scr' + 'ipt>\n</body>\n</html>';
+}
+function schedulePublish() {
+  if (soloMode) { ls('tdtb-solo-state', JSON.stringify(state)); pendingSet([]); return; }
+  if (pubTimer) clearTimeout(pubTimer);
+  pubTimer = setTimeout(doPublish, 700);
+}
+function doPublish() {
+  pubTimer = null;
+  if (pubBusy || readOnly || !artifactNS) return;
+  pubBusy = true;
+  setSyncChip('saving');
+  ss('tdtb-tab', tab);
+  artifactNS.publish(buildDoc(state)).then(function () {
+    pendingSet([]);            /* published — nothing left to replay */
+    setSyncChip('saved');      /* this view reloads momentarily */
+  }).catch(function (err) {
+    pubBusy = false;
+    var code = err && err.code;
+    if (code === 'conflict') { setSyncChip('sync'); /* reload delivers winner; pending replays on load */ }
+    else if (code === 'not_writer' || code === 'not_granted' || code === 'not_declared' || code === 'consent_required') {
+      readOnly = true; pendingSet([]); setSyncChip('readonly'); render();
+    } else if (code === 'rate_limited') { setSyncChip('waiting'); pubTimer = setTimeout(doPublish, 4000); }
+    else { setSyncChip('retry'); pubTimer = setTimeout(doPublish, 1500 + Math.random() * 1500); }
+  });
+}
+
+/* ---------------- derived ---------------- */
+function itemById(id) { for (var i = 0; i < ITEMS.length; i++) if (ITEMS[i][0] === id) return ITEMS[i]; return null; }
+function eatenCount() { var n = 0; for (var k in state.items) n++; return n; }
+function stopCounts() {
+  var done = 0, skip = 0;
+  for (var k in state.stops) { if (state.stops[k].s === 'done') done++; else if (state.stops[k].s === 'skip') skip++; }
+  return { done: done, skip: skip, active: STOPS.length - skip };
+}
+function overallPct() {
+  var sc = stopCounts();
+  var ip = eatenCount() / ITEMS.length;
+  var sp = sc.active ? sc.done / sc.active : 1;
+  return Math.round((ip * ITEM_W + sp * STOP_W) * 100);
+}
+function playerTotals() {
+  var t = [];
+  for (var p = 0; p < 5; p++) t.push({ items: 0, cal: 0, pro: 0, carb: 0, fat: 0 });
+  for (var id in state.items) {
+    var it = itemById(id); if (!it) continue;
+    var p2 = state.items[id].p; if (p2 == null || !t[p2]) continue;
+    t[p2].items++; t[p2].cal += it[4]; t[p2].pro += it[5]; t[p2].carb += it[6]; t[p2].fat += it[7];
+  }
+  return t;
+}
+function groupCalTotal() { var s = 0; for (var i = 0; i < ITEMS.length; i++) s += ITEMS[i][4]; return s; }
+function nextStopIdx() {
+  for (var i = 0; i < STOPS.length; i++) { var st = state.stops[i]; if (!st || (st.s !== 'done' && st.s !== 'skip')) return i; }
+  return -1;
+}
+function fmtClock(ts) {
+  var d = new Date(ts);
+  var h = d.getHours(), m = d.getMinutes(), ap = h >= 12 ? 'PM' : 'AM';
+  h = h % 12; if (h === 0) h = 12;
+  return h + ':' + (m < 10 ? '0' : '') + m + ' ' + ap;
+}
+function etaInfo() {
+  var sc = stopCounts();
+  var remaining = sc.active - sc.done;
+  if (remaining <= 0 && sc.active > 0) return { label: 'FINISHED', sub: 'Ya Hecho. Live Más.' };
+  if (!state.start) {
+    var mins = remaining * PRESTART_MIN_PER_STOP;
+    return { label: '~' + Math.floor(mins / 60) + 'h ' + (mins % 60) + 'm of racing', sub: 'estimate · ' + PRESTART_MIN_PER_STOP + ' min per stop · starts when you check in' };
+  }
+  if (!sc.done) return { label: 'warming up', sub: 'ETA locks in after the first stop is done' };
+  var pace = (Date.now() - state.start) / sc.done; /* ms per stop, drive included */
+  var eta = Date.now() + pace * remaining;
+  return { label: fmtClock(eta), sub: 'pace ' + Math.round(pace / 60000) + ' min/stop · ' + remaining + ' stops to go' };
+}
+function breakfastLeft() {
+  var n = 0;
+  for (var i = 0; i < ITEMS.length; i++) if (ITEMS[i][1] === 'Breakfast' && !state.items[ITEMS[i][0]]) n++;
+  return n;
+}
+function isRaceMorning() {
+  var d = new Date();
+  var iso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  return iso <= RACE_DAY && d.getHours() < BK_CUTOFF_H;
+}
+function mapsUrl(i) { return 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent('Taco Bell, ' + STOPS[i][0] + ', ' + STOPS[i][1].replace(/\s*\(.*\)/, '').replace(/·.*/, '')); }
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+/* ---------------- styles + shell ---------------- */
+var CSS = [
+'*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}',
+'html{-webkit-text-size-adjust:100%}',
+':root{--bg:#1B0B26;--surface:#2A1140;--surface2:#3A1B55;--line:#4A2668;--ink:#FCEFF7;--muted:#B99CD1;--pink:#FF3D9A;--teal:#3EE8D2;--gold:#FFC53D;--good:#8FE85C}',
+'body{background:var(--bg);color:var(--ink);font-family:Rubik,system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.45;min-height:100vh;padding-bottom:calc(76px + env(safe-area-inset-bottom))}',
+'.disp{font-family:Anton,Impact,"Arial Narrow",sans-serif;font-weight:400;letter-spacing:.02em;text-transform:uppercase}',
+'.num{font-variant-numeric:tabular-nums}',
+'header{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,#160821 0%,rgba(22,8,33,.96) 100%);border-bottom:1px solid var(--line);padding:10px 14px 8px}',
+'.hdr-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px}',
+'.wordmark{font-size:20px;color:var(--ink)}.wordmark em{font-style:normal;color:var(--pink)}',
+'.sync{font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}',
+'.sync.saving{color:var(--gold)}.sync.readonly{color:var(--pink)}',
+'.hdr-bar{margin-top:8px;height:6px;border-radius:3px;background:var(--surface2);overflow:hidden}',
+'.hdr-bar>i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--pink),var(--gold));transition:width .4s ease}',
+'@media (prefers-reduced-motion:reduce){.hdr-bar>i,.ringfg{transition:none!important}}',
+'main{padding:14px;max-width:560px;margin:0 auto}',
+'.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}',
+'.card h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;font-weight:500}',
+'.hero{display:flex;align-items:center;gap:16px}',
+'.ringwrap{position:relative;width:128px;height:128px;flex:0 0 auto}',
+'.ringwrap svg{width:100%;height:100%;transform:rotate(-90deg)}',
+'.ringfg{transition:stroke-dashoffset .5s ease}',
+'.ringlabel{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}',
+'.ringlabel .pct{font-size:34px;line-height:1;color:var(--ink)}',
+'.ringlabel .pctsub{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:3px}',
+'.hero-stats{flex:1;display:flex;flex-direction:column;gap:10px}',
+'.stat .v{font-size:24px;line-height:1.05}.stat .k{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}',
+'.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:500}',
+'.chip.warn{background:#4a3308;color:var(--gold);border:1px solid #6b4c10}',
+'.nextstop{display:flex;align-items:center;gap:12px}',
+'.stage-badge{flex:0 0 auto;width:52px;height:52px;border-radius:12px;background:var(--surface2);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center}',
+'.stage-badge .sn{font-size:20px;line-height:1;color:var(--teal)}',
+'.stage-badge .sk{font-size:8px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}',
+'.stage-badge.finish .sn{color:var(--gold)}',
+'.nextstop .addr{font-weight:700}.nextstop .city{font-size:13px;color:var(--muted)}',
+'.navbtn{margin-left:auto;flex:0 0 auto;background:var(--teal);color:#06251f;font-weight:700;border-radius:10px;padding:10px 14px;text-decoration:none;font-size:14px}',
+'.btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:var(--surface2);color:var(--ink);border-radius:10px;padding:10px 14px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit}',
+'.btn:focus-visible,.navbtn:focus-visible,.tabbtn:focus-visible,.itemrow:focus-visible{outline:2px solid var(--teal);outline-offset:2px}',
+'.btn.primary{background:var(--pink);border-color:var(--pink);color:#fff}',
+'.kv{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:14px}.kv:last-child{border-bottom:0}',
+'.kv .k{color:var(--muted)}',
+/* menu */
+'.filters{display:flex;gap:8px;margin-bottom:12px;position:sticky;top:64px;z-index:10;background:var(--bg);padding:6px 0}',
+'.fbtn{flex:0 0 auto;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted);padding:7px 14px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}',
+'.fbtn.on{background:var(--pink);border-color:var(--pink);color:#fff}',
+'.search{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:10px 12px;font-size:16px;font-family:inherit;margin-bottom:10px}',
+'.search::placeholder{color:var(--muted)}',
+'.cathdr{display:flex;justify-content:space-between;align-items:baseline;margin:16px 2px 8px}',
+'.cathdr .cn{font-size:15px;color:var(--teal)}.cathdr .cp{font-size:12px;color:var(--muted)}',
+'.itemrow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-bottom:8px;cursor:pointer;color:var(--ink);font-family:inherit;font-size:15px}',
+'.itemrow.done{background:#20301c;border-color:#33502b}',
+'.itemrow .nm{flex:1;min-width:0}.itemrow .nm .note{color:var(--muted);font-size:12px}',
+'.itemrow .cal{flex:0 0 auto;font-size:13px;color:var(--muted)}',
+'.pchip{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#1B0B26}',
+'.tick{flex:0 0 auto;width:26px;height:26px;border-radius:50%;border:2px dashed var(--line)}',
+/* route */
+'.strip{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}',
+'.dot{width:calc((100% - 45px)/10);aspect-ratio:1;border-radius:6px;background:var(--surface2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted)}',
+'.dot.done{background:var(--teal);border-color:var(--teal);color:#06251f;font-weight:700}',
+'.dot.skip{background:transparent;border-style:dashed;color:var(--line);text-decoration:line-through}',
+'.dot.next{border-color:var(--gold);color:var(--gold);box-shadow:0 0 0 2px #6b4c10}',
+'.stoprow{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}',
+'.stoprow.done{background:#12291f;border-color:#1f4a37}',
+'.stoprow.skip{opacity:.5}',
+'.stoprow .info{flex:1;min-width:0}.stoprow .a{font-weight:700;font-size:14px}.stoprow .c{font-size:12px;color:var(--muted)}',
+'.stoprow .t{font-size:11px;color:var(--teal)}',
+'.stopbtns{display:flex;flex-direction:column;gap:6px;align-items:stretch}',
+'.sbtn{border:1px solid var(--line);background:var(--surface2);color:var(--ink);border-radius:8px;padding:7px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;min-width:64px}',
+'.sbtn.done-on{background:var(--teal);border-color:var(--teal);color:#06251f}',
+'.sbtn.skip-btn{font-size:11px;color:var(--muted);font-weight:500;padding:4px 12px}',
+'.maplink{color:var(--teal);font-size:12px;text-decoration:none}',
+/* squad */
+'.pcard{border-radius:14px;padding:14px;margin-bottom:12px;background:var(--surface);border:1px solid var(--line);border-left:5px solid}',
+'.prow1{display:flex;align-items:center;gap:8px;margin-bottom:8px}',
+'.pname{font-size:18px}.jersey{margin-left:auto;font-size:11px;background:#4a3308;color:var(--gold);border:1px solid #6b4c10;border-radius:999px;padding:3px 9px;font-weight:700}',
+'.mebtn{font-size:11px;border-radius:999px;padding:3px 9px;border:1px solid var(--line);background:var(--surface2);color:var(--muted);cursor:pointer;font-family:inherit}',
+'.mebtn.on{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:700}',
+'.macros{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}',
+'.macros .mv{font-size:17px}.macros .mk{font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}',
+'.pbar{height:5px;border-radius:3px;background:var(--surface2);margin-top:10px;overflow:hidden}.pbar>i{display:block;height:100%}',
+/* sheet */
+'.overlay{position:fixed;inset:0;background:rgba(10,3,17,.7);z-index:40;display:flex;align-items:flex-end;justify-content:center}',
+'.sheet{width:100%;max-width:560px;background:var(--surface);border-radius:18px 18px 0 0;border:1px solid var(--line);border-bottom:0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}',
+'.sheet h3{font-size:18px;margin-bottom:2px}.sheet .sub{color:var(--muted);font-size:13px;margin-bottom:14px}',
+'.eatgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}',
+'.eatbtn{border:0;border-radius:12px;padding:14px 8px;font-size:16px;font-weight:700;cursor:pointer;color:#1B0B26;font-family:inherit}',
+'.eatbtn.big{grid-column:1/-1;padding:16px;font-size:18px}',
+'.sheet .row2{display:flex;gap:8px;margin-top:10px}',
+'.sheet .row2 .btn{flex:1}',
+'.namein{width:100%;background:var(--surface2);border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:12px;font-size:18px;font-family:inherit;margin-bottom:12px}',
+/* tabs */
+'nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:#160821;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}',
+'.tabbtn{flex:1;background:none;border:0;color:var(--muted);padding:10px 4px 8px;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}',
+'.tabbtn .ic{font-size:18px;line-height:1}.tabbtn .lb{font-size:10px;letter-spacing:.08em;text-transform:uppercase}',
+'.tabbtn.on{color:var(--ink)}.tabbtn.on .lb{color:var(--pink)}',
+'.banner{background:#4a1030;border:1px solid var(--pink);color:var(--ink);border-radius:12px;padding:10px 12px;font-size:13px;margin-bottom:12px}',
+'.finish-note{text-align:center;color:var(--muted);font-size:12px;margin:16px 0 4px}'
+].join('\n');
+
+document.head.insertAdjacentHTML('beforeend',
+  '<link rel="preconnect" href="https://fonts.googleapis.com">' +
+  '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Rubik:wght@400;500;700&display=swap">' +
+  '<style>' + CSS + '</style>');
+
+var root = document.createElement('div');
+document.body.appendChild(root);
+
+/* ---------------- rendering ---------------- */
+function setSyncChip(mode) {
+  var el = document.getElementById('syncchip'); if (!el) return;
+  el.className = 'sync ' + (mode === 'saving' ? 'saving' : mode === 'readonly' ? 'readonly' : '');
+  el.textContent = mode === 'saving' ? 'saving…' : mode === 'saved' ? 'saved' :
+    mode === 'readonly' ? 'read-only' : mode === 'waiting' ? 'slow down…' :
+    mode === 'retry' ? 'retrying…' : mode === 'solo' ? 'solo mode' :
+    mode === 'sync' ? 'syncing…' : 'live';
+}
+
+function render() {
+  var pct = overallPct();
+  var html = '';
+  html += '<header><div class="hdr-row"><div class="wordmark disp">Tour de <em>Taco Bell</em></div>' +
+    '<span id="syncchip" class="sync">live</span></div>' +
+    '<div class="hdr-bar"><i style="width:' + pct + '%"></i></div></header>';
+  html += '<main>';
+  if (readOnly) html += '<div class="banner">This view is read-only. Ask Wyatt to share the artifact with edit access so your taps count.</div>';
+  if (soloMode) html += '<div class="banner">Solo mode: no live sync here, progress saves to this phone only.</div>';
+  if (tab === 'race') html += renderRace(pct);
+  else if (tab === 'menu') html += renderMenu();
+  else if (tab === 'route') html += renderRoute();
+  else html += renderSquad();
+  html += '</main>';
+  html += '<nav>' + [
+    ['race', '🏁', 'Race'],
+    ['menu', '🌮', 'Menu'],
+    ['route', '🗺', 'Route'],
+    ['squad', '🚴', 'Squad']
+  ].map(function (t) {
+    return '<button class="tabbtn' + (tab === t[0] ? ' on' : '') + '" data-tab="' + t[0] + '"><span class="ic">' + t[1] + '</span><span class="lb">' + t[2] + '</span></button>';
+  }).join('') + '</nav>';
+  root.innerHTML = html;
+  wire();
+}
+
+function renderRace(pct) {
+  var sc = stopCounts(), eaten = eatenCount(), eta = etaInfo();
+  var ns = nextStopIdx();
+  var totals = playerTotals();
+  var calEaten = 0; totals.forEach(function (t) { calEaten += t.cal; });
+  var calAll = groupCalTotal();
+  var r = 56, circ = 2 * Math.PI * r;
+  var h = '<div class="card"><div class="hero">' +
+    '<div class="ringwrap"><svg viewBox="0 0 128 128">' +
+    '<circle cx="64" cy="64" r="' + r + '" fill="none" stroke="#3A1B55" stroke-width="11"/>' +
+    '<circle class="ringfg" cx="64" cy="64" r="' + r + '" fill="none" stroke="#FF3D9A" stroke-linecap="round" stroke-width="11" stroke-dasharray="' + circ + '" stroke-dashoffset="' + (circ * (1 - pct / 100)) + '"/>' +
+    '</svg><div class="ringlabel"><span class="pct disp num">' + pct + '%</span><span class="pctsub">complete</span></div></div>' +
+    '<div class="hero-stats">' +
+    '<div class="stat"><div class="v disp num">' + (ITEMS.length - eaten) + '</div><div class="k">items left of ' + ITEMS.length + '</div></div>' +
+    '<div class="stat"><div class="v disp num">' + (sc.active - sc.done) + '</div><div class="k">stops left of ' + sc.active + (sc.skip ? ' (' + sc.skip + ' skipped)' : '') + '</div></div>' +
+    '</div></div></div>';
+
+  if (ns >= 0) {
+    var isFinish = ns === STOPS.length - 1;
+    h += '<div class="card"><h2>' + (isFinish ? 'Final stage' : 'Next stop') + '</h2><div class="nextstop">' +
+      '<div class="stage-badge' + (isFinish ? ' finish' : '') + '"><span class="sn disp num">' + (ns + 1) + '</span><span class="sk">stage</span></div>' +
+      '<div><div class="addr">' + esc(STOPS[ns][0]) + '</div><div class="city">' + esc(STOPS[ns][1]) + '</div></div>' +
+      '<a class="navbtn" target="_blank" rel="noopener" href="' + mapsUrl(ns) + '">Navigate</a>' +
+      '</div></div>';
+  } else {
+    h += '<div class="card"><h2>Route</h2><div class="disp" style="font-size:22px;color:var(--gold)">Every stage complete 🏆</div></div>';
+  }
+
+  h += '<div class="card"><h2>Projected finish</h2>' +
+    '<div class="disp num" style="font-size:30px">' + eta.label + '</div>' +
+    '<div style="color:var(--muted);font-size:13px;margin-top:2px">' + eta.sub + '</div>' +
+    (!state.start ? '<button class="btn primary" id="startbtn" style="margin-top:12px">🚦 Start the race clock</button>' : '') +
+    '</div>';
+
+  var bk = breakfastLeft();
+  if (bk > 0 && isRaceMorning()) {
+    h += '<div class="card"><span class="chip warn">🌅 ' + bk + ' breakfast item' + (bk === 1 ? '' : 's') + ' left — sold until ~11 AM</span></div>';
+  }
+
+  h += '<div class="card"><h2>Group intake</h2>' +
+    '<div class="kv"><span class="k">Calories eaten</span><span class="num"><b>' + calEaten.toLocaleString() + '</b> / ' + calAll.toLocaleString() + '</span></div>' +
+    '<div class="kv"><span class="k">Fair share</span><span class="num">~' + Math.round(ITEMS.length / 5) + ' items · ~' + Math.round(calAll / 5).toLocaleString() + ' cal each</span></div>' +
+    '<div class="pbar"><i style="width:' + Math.min(100, Math.round(calEaten / calAll * 100)) + '%;background:linear-gradient(90deg,var(--teal),var(--gold))"></i></div>' +
+    '</div>';
+  h += '<div class="finish-note">Sunday 8/30 · 30 stages · 111 items · 5 riders · finish: 168th &amp; Maple</div>';
+  return h;
+}
+
+function renderMenu() {
+  var h = '<input class="search" id="menusearch" type="search" placeholder="Search 111 items…" value="' + esc(menuSearch) + '">';
+  h += '<div class="filters">' + [['all', 'All'], ['left', 'Left'], ['eaten', 'Eaten']].map(function (f) {
+    return '<button class="fbtn' + (menuFilter === f[0] ? ' on' : '') + '" data-filter="' + f[0] + '">' + f[1] + '</button>';
+  }).join('') + '</div>';
+  var q = menuSearch.toLowerCase();
+  CAT_ORDER.forEach(function (cat) {
+    var rows = ITEMS.filter(function (it) { return it[1] === cat; });
+    var vis = rows.filter(function (it) {
+      var done = !!state.items[it[0]];
+      if (menuFilter === 'left' && done) return false;
+      if (menuFilter === 'eaten' && !done) return false;
+      if (q && it[2].toLowerCase().indexOf(q) < 0) return false;
+      return true;
+    });
+    if (!vis.length) return;
+    var doneN = rows.filter(function (it) { return !!state.items[it[0]]; }).length;
+    h += '<div class="cathdr"><span class="cn disp">' + esc(cat) + '</span><span class="cp num">' + doneN + '/' + rows.length + '</span></div>';
+    vis.forEach(function (it) {
+      var e = state.items[it[0]];
+      var chip = e && e.p != null
+        ? '<span class="pchip" style="background:' + JERSEYS[e.p] + '">' + esc((state.names[e.p] || '?').charAt(0)) + '</span>'
+        : '<span class="tick"></span>';
+      h += '<button class="itemrow' + (e ? ' done' : '') + '" data-item="' + it[0] + '">' + chip +
+        '<span class="nm">' + esc(it[2]) + (it[3] ? ' <span class="note">' + esc(it[3]) + '</span>' : '') + '</span>' +
+        '<span class="cal num">' + it[4] + (it[8] ? '~' : '') + ' cal</span></button>';
+    });
+  });
+  h += '<div class="finish-note">~ = estimated nutrition (not published by Taco Bell)</div>';
+  return h;
+}
+
+function renderRoute() {
+  var ns = nextStopIdx();
+  var h = '<div class="card"><h2>Stage board</h2><div class="strip">';
+  for (var i = 0; i < STOPS.length; i++) {
+    var st = state.stops[i];
+    var cls = st && st.s === 'done' ? ' done' : st && st.s === 'skip' ? ' skip' : (i === ns ? ' next' : '');
+    h += '<div class="dot num' + cls + '">' + (i + 1) + '</div>';
+  }
+  h += '</div></div>';
+  for (var j = 0; j < STOPS.length; j++) {
+    var s2 = state.stops[j];
+    var status = s2 ? s2.s : null;
+    var isFinish = j === STOPS.length - 1;
+    h += '<div class="stoprow' + (status === 'done' ? ' done' : status === 'skip' ? ' skip' : '') + '">' +
+      '<div class="stage-badge' + (isFinish ? ' finish' : '') + '" style="width:44px;height:44px"><span class="sn disp num" style="font-size:16px">' + (j + 1) + '</span><span class="sk">' + (isFinish ? 'finish' : 'stage') + '</span></div>' +
+      '<div class="info"><div class="a">' + esc(STOPS[j][0]) + '</div><div class="c">' + esc(STOPS[j][1]) + '</div>' +
+      (s2 && s2.t ? '<div class="t num">' + (status === 'done' ? '✓ ' + fmtClock(s2.t) : 'skipped') + '</div>' : '<a class="maplink" target="_blank" rel="noopener" href="' + mapsUrl(j) + '">Open in Maps →</a>') +
+      '</div>' +
+      '<div class="stopbtns">' +
+      '<button class="sbtn' + (status === 'done' ? ' done-on' : '') + '" data-stopdone="' + j + '">' + (status === 'done' ? 'Done ✓' : 'Done') + '</button>' +
+      '<button class="sbtn skip-btn" data-stopskip="' + j + '">' + (status === 'skip' ? 'unskip' : 'skip') + '</button>' +
+      '</div></div>';
+  }
+  return h;
+}
+
+function renderSquad() {
+  var totals = playerTotals();
+  var maxCal = 0, leader = -1;
+  totals.forEach(function (t, i) { if (t.cal > maxCal) { maxCal = t.cal; leader = i; } });
+  var h = '';
+  if (me < 0) h += '<div class="banner">Tap “this is me” on your card — it makes logging items one tap.</div>';
+  for (var p = 0; p < 5; p++) {
+    var t = totals[p];
+    h += '<div class="pcard" style="border-left-color:' + JERSEYS[p] + '">' +
+      '<div class="prow1"><span class="pchip" style="background:' + JERSEYS[p] + '">' + esc((state.names[p] || '?').charAt(0)) + '</span>' +
+      '<span class="pname disp">' + esc(state.names[p]) + '</span>' +
+      (leader === p && maxCal > 0 ? '<span class="jersey">💛 yellow jersey</span>' : '') +
+      '</div>' +
+      '<div style="display:flex;gap:8px;margin-bottom:10px">' +
+      '<button class="mebtn' + (me === p ? ' on' : '') + '" data-me="' + p + '">' + (me === p ? '✓ this is me' : 'this is me') + '</button>' +
+      '<button class="mebtn" data-rename="' + p + '">rename</button>' +
+      '</div>' +
+      '<div class="macros">' +
+      '<div><div class="mv disp num">' + t.cal.toLocaleString() + '</div><div class="mk">cal</div></div>' +
+      '<div><div class="mv disp num">' + t.pro + 'g</div><div class="mk">protein</div></div>' +
+      '<div><div class="mv disp num">' + t.carb + 'g</div><div class="mk">carbs</div></div>' +
+      '<div><div class="mv disp num">' + t.fat + 'g</div><div class="mk">fat</div></div>' +
+      '</div>' +
+      '<div class="pbar"><i style="width:' + (maxCal ? Math.round(t.cal / maxCal * 100) : 0) + '%;background:' + JERSEYS[p] + '"></i></div>' +
+      '<div style="font-size:12px;color:var(--muted);margin-top:6px" class="num">' + t.items + ' item' + (t.items === 1 ? '' : 's') + ' eaten</div>' +
+      '</div>';
+  }
+  return h;
+}
+
+/* ---------------- sheets ---------------- */
+function openEatSheet(id) {
+  var it = itemById(id); if (!it) return;
+  var cur = state.items[id];
+  var h = '<div class="overlay" id="overlay"><div class="sheet">' +
+    '<h3>' + esc(it[2]) + (it[3] ? ' · ' + esc(it[3]) : '') + '</h3>' +
+    '<div class="sub num">' + it[4] + (it[8] ? '~' : '') + ' cal · ' + it[5] + 'g protein · ' + it[6] + 'g carbs · ' + it[7] + 'g fat</div>' +
+    '<div class="eatgrid">';
+  if (me >= 0 && !cur) h += '<button class="eatbtn big" data-eat="' + me + '" style="background:' + JERSEYS[me] + '">' + esc(state.names[me]) + ' ate it</button>';
+  for (var p = 0; p < 5; p++) {
+    if (me >= 0 && !cur && p === me) continue;
+    h += '<button class="eatbtn" data-eat="' + p + '" style="background:' + JERSEYS[p] + '">' + esc(state.names[p]) + (cur && cur.p === p ? ' ✓' : '') + '</button>';
+  }
+  h += '</div><div class="row2">' +
+    (cur ? '<button class="btn" id="clearitem">Undo — nobody ate it</button>' : '') +
+    '<button class="btn" id="closesheet">Cancel</button></div>' +
+    '</div></div>';
+  document.body.insertAdjacentHTML('beforeend', h);
+  var ov = document.getElementById('overlay');
+  ov.addEventListener('click', function (ev) {
+    if (ev.target === ov || ev.target.id === 'closesheet') { ov.remove(); return; }
+    var eat = ev.target.closest('[data-eat]');
+    if (eat) { dispatch({ k: 'item', id: id, p: parseInt(eat.getAttribute('data-eat'), 10), t: Date.now() }); ov.remove(); return; }
+    if (ev.target.id === 'clearitem') { dispatch({ k: 'item', id: id, p: null, t: Date.now() }); ov.remove(); }
+  });
+}
+
+function openRenameSheet(p) {
+  var h = '<div class="overlay" id="overlay"><div class="sheet">' +
+    '<h3>Rename rider</h3><div class="sub">Jersey stays ' + '<span style="color:' + JERSEYS[p] + '">●</span></div>' +
+    '<input class="namein" id="namein" value="' + esc(state.names[p]) + '" maxlength="14">' +
+    '<div class="row2"><button class="btn primary" id="savename">Save</button><button class="btn" id="closesheet">Cancel</button></div>' +
+    '</div></div>';
+  document.body.insertAdjacentHTML('beforeend', h);
+  var ov = document.getElementById('overlay');
+  document.getElementById('namein').focus();
+  ov.addEventListener('click', function (ev) {
+    if (ev.target === ov || ev.target.id === 'closesheet') { ov.remove(); return; }
+    if (ev.target.id === 'savename') {
+      var v = document.getElementById('namein').value.trim();
+      if (v) dispatch({ k: 'name', i: p, v: v });
+      ov.remove();
+    }
+  });
+}
+
+/* ---------------- events ---------------- */
+function wire() {
+  root.querySelectorAll('[data-tab]').forEach(function (b) {
+    b.addEventListener('click', function () { tab = b.getAttribute('data-tab'); ss('tdtb-tab', tab); render(); window.scrollTo(0, 0); });
+  });
+  var sb = document.getElementById('startbtn');
+  if (sb) sb.addEventListener('click', function () { dispatch({ k: 'start', t: Date.now() }); });
+  var msearch = document.getElementById('menusearch');
+  if (msearch) msearch.addEventListener('input', function () {
+    menuSearch = msearch.value;
+    /* re-render list only, keep input focus */
+    var keep = msearch.value;
+    render();
+    var again = document.getElementById('menusearch');
+    if (again) { again.value = keep; again.focus(); try { again.setSelectionRange(keep.length, keep.length); } catch (e) {} }
+  });
+  root.querySelectorAll('[data-filter]').forEach(function (b) {
+    b.addEventListener('click', function () { menuFilter = b.getAttribute('data-filter'); render(); });
+  });
+  root.querySelectorAll('[data-item]').forEach(function (b) {
+    b.addEventListener('click', function () { if (!readOnly) openEatSheet(b.getAttribute('data-item')); });
+  });
+  root.querySelectorAll('[data-stopdone]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (readOnly) return;
+      var i = parseInt(b.getAttribute('data-stopdone'), 10);
+      var cur = state.stops[i];
+      if (cur && cur.s === 'done') dispatch({ k: 'stop', i: i, s: null, t: Date.now() });
+      else { if (!state.start) dispatch({ k: 'start', t: Date.now() }); dispatch({ k: 'stop', i: i, s: 'done', t: Date.now() }); }
+    });
+  });
+  root.querySelectorAll('[data-stopskip]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (readOnly) return;
+      var i = parseInt(b.getAttribute('data-stopskip'), 10);
+      var cur = state.stops[i];
+      if (cur && cur.s === 'skip') dispatch({ k: 'stop', i: i, s: null, t: Date.now() });
+      else dispatch({ k: 'stop', i: i, s: 'skip', t: Date.now() });
+    });
+  });
+  root.querySelectorAll('[data-me]').forEach(function (b) {
+    b.addEventListener('click', function () { me = parseInt(b.getAttribute('data-me'), 10); ls('tdtb-player', String(me)); render(); });
+  });
+  root.querySelectorAll('[data-rename]').forEach(function (b) {
+    b.addEventListener('click', function () { if (!readOnly) openRenameSheet(parseInt(b.getAttribute('data-rename'), 10)); });
+  });
+}
+
+/* ---------------- boot ---------------- */
+render();
+
+/* replay any ops that were pending when a reload interrupted us */
+(function replayPending() {
+  var ops = pendingGet();
+  if (!ops.length) return;
+  var before = JSON.stringify(state);
+  ops.forEach(function (op) { applyOp(state, op); });
+  if (JSON.stringify(state) !== before) { render(); schedulePublish(); }
+  else pendingSet([]);
+})();
+
+/* live ETA refresh */
+setInterval(function () { if (tab === 'race' && !document.getElementById('overlay')) render(); }, 60000);
+
+if (window.claude && typeof window.claude.use === 'function') {
+  window.claude.use('artifact').then(function (ns) {
+    if (ns) { artifactNS = ns; setSyncChip('live'); if (pendingGet().length) schedulePublish(); }
+    else { soloMode = true; var saved = ls('tdtb-solo-state'); if (saved) { try { state = JSON.parse(saved); } catch (e) {} } setSyncChip('solo'); render(); }
+  });
+} else {
+  soloMode = true;
+  var saved = ls('tdtb-solo-state'); if (saved) { try { state = JSON.parse(saved); } catch (e) {} }
+  setSyncChip('solo'); render();
+}
+})();
+</script>
