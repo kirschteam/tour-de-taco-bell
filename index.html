@@ -216,7 +216,7 @@ function saveQueue() { ls('tdtb-queue', queue.length ? JSON.stringify(queue) : n
 function saveSolo() { ls('tdtb-state', JSON.stringify(state)); }
 
 function applyOp(st, op) {
-  if (op.k === 'item') { if (op.p === null) delete st.items[op.id]; else st.items[op.id] = { p: op.p, t: op.t }; }
+  if (op.k === 'item') { if (op.p === null) delete st.items[op.id]; else st.items[op.id] = { p: op.p, t: op.t, s: op.at }; }
   else if (op.k === 'stop') { if (op.s === null) delete st.stops[op.i]; else st.stops[op.i] = { s: op.s, t: op.t }; }
   else if (op.k === 'name') { st.names[op.i] = op.v; }
   else if (op.k === 'start') { if (!st.start) st.start = op.t; }
@@ -228,7 +228,7 @@ function opRequest(op) {
   var base = DB_URL.replace(/\/$/, '') + DB_PATH;
   if (op.k === 'item') return op.p === null
     ? { m: 'DELETE', u: base + '/items/' + op.id + '.json' }
-    : { m: 'PUT', u: base + '/items/' + op.id + '.json', b: { p: op.p, t: op.t } };
+    : { m: 'PUT', u: base + '/items/' + op.id + '.json', b: { p: op.p, t: op.t, s: op.at } };
   if (op.k === 'stop') return op.s === null
     ? { m: 'DELETE', u: base + '/stops/' + op.i + '.json' }
     : { m: 'PUT', u: base + '/stops/' + op.i + '.json', b: { s: op.s, t: op.t } };
@@ -306,6 +306,14 @@ function connectStream() {
 
 /* ---------------- derived ---------------- */
 function itemById(id) { for (var i = 0; i < ITEMS.length; i++) if (ITEMS[i][0] === id) return ITEMS[i]; return null; }
+function itemsAtStop(si) {
+  var out = [];
+  for (var i = 0; i < ITEMS.length; i++) {
+    var e = state.items[ITEMS[i][0]];
+    if (e && e.s === si) out.push({ it: ITEMS[i], e: e });
+  }
+  return out;
+}
 function eatenCount() { var n = 0; for (var k in state.items) n++; return n; }
 function stopCounts() {
   var done = 0, skip = 0;
@@ -431,6 +439,18 @@ var CSS = [
 '.stoprow.skip{opacity:.5}',
 '.stoprow .info{flex:1;min-width:0}.stoprow .a{font-weight:700;font-size:14px}.stoprow .c{font-size:12px;color:var(--muted)}',
 '.stoprow .t{font-size:11px;color:var(--teal)}',
+'.stopitems{font-size:12px;color:var(--muted);margin-top:4px;cursor:pointer}',
+'.stopitems b{color:var(--teal);font-weight:700}',
+'.ordlist{max-height:48vh;overflow-y:auto;margin:10px 0;-webkit-overflow-scrolling:touch}',
+'.ordhead{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin:10px 2px 6px}',
+'.ordrow{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:9px 10px;margin-bottom:7px}',
+'.ordrow.on{border-color:var(--teal)}',
+'.ordname{display:flex;justify-content:space-between;gap:8px;font-size:14px}',
+'.ordname .note{color:var(--muted);font-size:12px}',
+'.ordname .oc{flex:0 0 auto;color:var(--muted);font-size:12px}',
+'.orddots{display:flex;gap:8px;margin-top:8px}',
+'.rdot{width:34px;height:34px;border-radius:50%;border:2px solid transparent;padding:0;font-weight:700;color:#1B0B26;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;opacity:.4}',
+'.rdot.on{opacity:1;border-color:var(--ink)}',
 '.stopbtns{display:flex;flex-direction:column;gap:6px;align-items:stretch}',
 '.sbtn{border:1px solid var(--line);background:var(--surface2);color:var(--ink);border-radius:8px;padding:7px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;min-width:64px}',
 '.sbtn.done-on{background:var(--teal);border-color:var(--teal);color:#06251f}',
@@ -578,7 +598,8 @@ function renderMenu() {
         ? '<span class="pchip" style="background:' + JERSEYS[e.p] + '">' + esc((state.names[e.p] || '?').charAt(0)) + '</span>'
         : '<span class="tick"></span>';
       h += '<button class="itemrow' + (e ? ' done' : '') + '" data-item="' + it[0] + '">' + chip +
-        '<span class="nm">' + esc(it[2]) + (it[3] ? ' <span class="note">' + esc(it[3]) + '</span>' : '') + '</span>' +
+        '<span class="nm">' + esc(it[2]) + (it[3] ? ' <span class="note">' + esc(it[3]) + '</span>' : '') +
+        (e && e.s != null ? ' <span class="note num">· stage ' + (e.s + 1) + '</span>' : '') + '</span>' +
         '<span class="cal num">' + it[4] + (it[8] ? '~' : '') + ' cal</span></button>';
     });
   });
@@ -599,10 +620,20 @@ function renderRoute() {
     var s2 = state.stops[j];
     var status = s2 ? s2.s : null;
     var isFinish = j === STOPS.length - 1;
+    var oi = itemsAtStop(j);
+    var orderHtml = '';
+    if (oi.length) {
+      orderHtml = '<div class="stopitems" data-editorder="' + j + '">' + oi.map(function (o) {
+        return esc(o.it[2]) + ' <b>' + esc((state.names[o.e.p] || '?').charAt(0)) + '</b>';
+      }).join(' · ') + '</div>';
+    } else if (status === 'done') {
+      orderHtml = '<div class="stopitems" data-editorder="' + j + '">+ add what was ordered</div>';
+    }
     h += '<div class="stoprow' + (status === 'done' ? ' done' : status === 'skip' ? ' skip' : '') + '">' +
       '<div class="stage-badge' + (isFinish ? ' finish' : '') + '" style="width:44px;height:44px"><span class="sn disp num" style="font-size:16px">' + (j + 1) + '</span><span class="sk">' + (isFinish ? 'finish' : 'stage') + '</span></div>' +
       '<div class="info"><div class="a">' + esc(STOPS[j][0]) + '</div><div class="c">' + esc(STOPS[j][1]) + '</div>' +
       (s2 && s2.t ? '<div class="t num">' + (status === 'done' ? '✓ ' + fmtClock(s2.t) : 'skipped') + '</div>' : '<a class="maplink" target="_blank" rel="noopener" href="' + mapsUrl(j) + '">Open in Maps →</a>') +
+      orderHtml +
       '</div>' +
       '<div class="stopbtns">' +
       '<button class="sbtn' + (status === 'done' ? ' done-on' : '') + '" data-stopdone="' + j + '">' + (status === 'done' ? 'Done ✓' : 'Done') + '</button>' +
@@ -646,9 +677,11 @@ function renderSquad() {
 function openEatSheet(id) {
   var it = itemById(id); if (!it) return;
   var cur = state.items[id];
+  var atStop = cur && cur.s != null ? cur.s : (nextStopIdx() >= 0 ? nextStopIdx() : undefined);
   var h = '<div class="overlay" id="overlay"><div class="sheet">' +
     '<h3>' + esc(it[2]) + (it[3] ? ' · ' + esc(it[3]) : '') + '</h3>' +
-    '<div class="sub num">' + it[4] + (it[8] ? '~' : '') + ' cal · ' + it[5] + 'g protein · ' + it[6] + 'g carbs · ' + it[7] + 'g fat</div>' +
+    '<div class="sub num">' + it[4] + (it[8] ? '~' : '') + ' cal · ' + it[5] + 'g protein · ' + it[6] + 'g carbs · ' + it[7] + 'g fat' +
+    (atStop != null ? '<br>logs to stage ' + (atStop + 1) + ' · ' + esc(STOPS[atStop][0]) : '') + '</div>' +
     '<div class="eatgrid">';
   if (me >= 0 && !cur) h += '<button class="eatbtn big" data-eat="' + me + '" style="background:' + JERSEYS[me] + '">' + esc(state.names[me]) + ' ate it</button>';
   for (var p = 0; p < 5; p++) {
@@ -664,8 +697,79 @@ function openEatSheet(id) {
   ov.addEventListener('click', function (ev) {
     if (ev.target === ov || ev.target.id === 'closesheet') { ov.remove(); return; }
     var eat = ev.target.closest('[data-eat]');
-    if (eat) { dispatch({ k: 'item', id: id, p: parseInt(eat.getAttribute('data-eat'), 10), t: Date.now() }); ov.remove(); return; }
+    if (eat) { dispatch({ k: 'item', id: id, p: parseInt(eat.getAttribute('data-eat'), 10), t: Date.now(), at: atStop }); ov.remove(); return; }
     if (ev.target.id === 'clearitem') { dispatch({ k: 'item', id: id, p: null, t: Date.now() }); ov.remove(); }
+  });
+}
+
+function openOrderSheet(si) {
+  var search = '';
+  var wasDone = state.stops[si] && state.stops[si].s === 'done';
+  var h = '<div class="overlay" id="overlay"><div class="sheet">' +
+    '<h3>Stage ' + (si + 1) + ' · ' + esc(STOPS[si][0]) + '</h3>' +
+    '<div class="sub">What did you order here? Tap a rider on each item.</div>' +
+    '<input class="search" id="ordsearch" type="search" placeholder="Search items…">' +
+    '<div class="ordlist" id="ordbody"></div>' +
+    '<div class="row2"><button class="btn primary" id="ordconfirm">' + (wasDone ? 'Save' : '✓ Mark stop done') + '</button>' +
+    '<button class="btn" id="closesheet">Close</button></div>' +
+    '</div></div>';
+  document.body.insertAdjacentHTML('beforeend', h);
+  var ov = document.getElementById('overlay');
+  var body = document.getElementById('ordbody');
+
+  function row(it) {
+    var e = state.items[it[0]];
+    var dots = '';
+    for (var p = 0; p < 5; p++) {
+      var on = e && e.p === p && e.s === si;
+      dots += '<button class="rdot' + (on ? ' on' : '') + '" style="background:' + JERSEYS[p] + '" data-oid="' + it[0] + '" data-op="' + p + '">' + esc((state.names[p] || '?').charAt(0)) + '</button>';
+    }
+    return '<div class="ordrow' + (e && e.s === si ? ' on' : '') + '">' +
+      '<div class="ordname"><span>' + esc(it[2]) + (it[3] ? ' <span class="note">' + esc(it[3]) + '</span>' : '') + '</span>' +
+      '<span class="oc num">' + it[4] + (it[8] ? '~' : '') + ' cal</span></div>' +
+      '<div class="orddots">' + dots + '</div></div>';
+  }
+
+  function draw() {
+    var q = search.toLowerCase();
+    var mine = [], rest = [];
+    ITEMS.forEach(function (it) {
+      var e = state.items[it[0]];
+      if (e && e.s === si) mine.push(it);
+      else if (!e && (!q || it[2].toLowerCase().indexOf(q) >= 0)) rest.push(it);
+    });
+    var hh = '';
+    if (mine.length) hh += '<div class="ordhead">Ordered here · ' + mine.length + '</div>' + mine.map(row).join('');
+    hh += '<div class="ordhead">' + (q ? 'Matches' : 'Items left') + '</div>';
+    hh += rest.slice(0, 40).map(row).join('');
+    if (rest.length > 40) hh += '<div class="finish-note">' + (rest.length - 40) + ' more — search to narrow down</div>';
+    if (!rest.length) hh += '<div class="finish-note">' + (q ? 'no matches' : 'nothing left to eat 🏆') + '</div>';
+    body.innerHTML = hh;
+  }
+  draw();
+
+  var si2 = document.getElementById('ordsearch');
+  si2.addEventListener('input', function () { search = si2.value; draw(); });
+
+  ov.addEventListener('click', function (ev) {
+    if (ev.target === ov || ev.target.id === 'closesheet') { ov.remove(); return; }
+    var dot = ev.target.closest('[data-oid]');
+    if (dot) {
+      var id = dot.getAttribute('data-oid'), p2 = parseInt(dot.getAttribute('data-op'), 10);
+      var cur = state.items[id];
+      if (cur && cur.p === p2 && cur.s === si) dispatch({ k: 'item', id: id, p: null, t: Date.now() });
+      else dispatch({ k: 'item', id: id, p: p2, t: Date.now(), at: si });
+      draw();
+      return;
+    }
+    if (ev.target.id === 'ordconfirm') {
+      var st = state.stops[si];
+      if (!st || st.s !== 'done') {
+        if (!state.start) dispatch({ k: 'start', t: Date.now() });
+        dispatch({ k: 'stop', i: si, s: 'done', t: Date.now() });
+      }
+      ov.remove();
+    }
   });
 }
 
@@ -730,8 +834,11 @@ function wire() {
       var i = parseInt(b.getAttribute('data-stopdone'), 10);
       var cur = state.stops[i];
       if (cur && cur.s === 'done') dispatch({ k: 'stop', i: i, s: null, t: Date.now() });
-      else { if (!state.start) dispatch({ k: 'start', t: Date.now() }); dispatch({ k: 'stop', i: i, s: 'done', t: Date.now() }); }
+      else openOrderSheet(i);
     });
+  });
+  root.querySelectorAll('[data-editorder]').forEach(function (b) {
+    b.addEventListener('click', function () { openOrderSheet(parseInt(b.getAttribute('data-editorder'), 10)); });
   });
   root.querySelectorAll('[data-stopskip]').forEach(function (b) {
     b.addEventListener('click', function () {
