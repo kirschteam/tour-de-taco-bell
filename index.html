@@ -180,10 +180,15 @@ var STOPS = [
 var COORDS = [[41.26483,-95.8415],[41.24168,-95.82626],[41.22887,-95.84966],[41.26165,-95.88856],[41.32834,-95.95829],[41.31453,-96.02446],[41.30539,-96.05202],[41.288,-96.08072],[41.2593,-96.02192],[41.25933,-95.97077],[41.22099,-95.97537],[41.2127,-95.9862],[41.14438,-95.91225],[41.1593,-95.93593],[41.14064,-95.97509],[41.1379,-96.02824],[41.17944,-96.04324],[41.21106,-96.02444],[41.23296,-96.04367],[41.23394,-96.1017],[41.23444,-96.14239],[41.20442,-96.08176],[41.20466,-96.12773],[41.19135,-96.19969],[41.14463,-96.16281],[41.19262,-96.2353],[41.23352,-96.20255],[41.26799,-96.23492],[41.29274,-96.14228],[41.2915,-96.18284]];
 
 /* planned order per stop: breakfast + coffee/OJ at stops 1-4 (gone by 11 AM),
-   the rest calorie-balanced (~1,100-1,270 cal/stop), max 2 drinks per stop */
-var PLAN = [["bk-cw-sausage","bk-q-steak","bk-salsa","ctb-bacon","cin-coffee-hot"],["bk-cw-bacon","ctb-sausage","gtb-bacon","hash-brown","coffee-iced"],["bk-cal-cw-bacon","bk-q-sausage","ctb-potato","cin-coffee-iced","coffee-hot"],["bk-q-bacon","gtb-sausage","gtb-steak","oj"],["ref-mango","f-g2","s-cinnabon","s-mild"],["baja-freeze","n-bellgrande","s-hot","t-dlt"],["gcb","f-wild-straw","f-baja-zero","s-bb-rice"],["f-pepsi-zero","cc-bacon-melt","s-twists","t-bb-chalupa"],["bb-gcb","lx-stacker","s-diablo","t-crunchy"],["bean-burrito","f-lipton-unsweet","pj-fries","t-soft-beef"],["water","pj-melty","sp-rollup","t-chalupa-beef"],["cc-rolled-q","ds-baja-zero","ref-dragon","sp-enchirito"],["f-starry","s-black-beans","s-pintos","sp-mex-pizza"],["av-verde","f-pepsi","n-chips-cheese","sp-cws"],["bs-beef","f-diet-pepsi","cc-taco-ranch","q-chicken"],["jal-citrus","f-lipton-sweet","sp-flatbread","sp-bb-cws"],["f-drpepper","pineapple-freeze","s-fire","t-dcgc"],["f-dew-zero","f-mug","n-chips-guac","cc-burr-ranch"],["f-trop-lemonade","q-steak","s-fiesta-pot"],["lx-dip","t-cgc","t-spicy-potato"],["b5l","ref-rock-punch","f-midnight"],["cc-bowl","ref-rock-pine","f-baja"],["cc-burrito","ds-lemonade","lx-salad"],["cc-crispy","f-dew","s-nacho-fries"],["ds-baja-freeze","ds-pepsi","t-soft-sup"],["cbr","f-brisk","lx-griller"],["cc-strips","pj-fresca","t-crunchy-sup"],["q-cheese","t-dlt-sup","veggie-bowl"],["ds-baja","ref-strawpass","sp-veg-pizza"],["cdb","cc-soft","ds-midnight"]];
+   caffeinated drinks all placed by stop 18 (Rockstar energy at stops 5-6),
+   the rest calorie-balanced (~1,080-1,280 cal/stop), max 2 drinks per stop */
+var PLAN = [["bk-cw-sausage","bk-q-steak","bk-salsa","ctb-bacon","cin-coffee-hot"],["bk-cw-bacon","ctb-sausage","gtb-bacon","hash-brown","coffee-iced"],["bk-cal-cw-bacon","bk-q-sausage","ctb-potato","cin-coffee-iced","coffee-hot"],["bk-q-bacon","gtb-sausage","gtb-steak","oj"],["ds-baja-zero","ref-rock-punch","pineapple-freeze","t-cgc"],["bean-burrito","ref-rock-pine","f-dew-zero","t-dcgc"],["cc-soft","ds-baja-freeze","f-g2","pj-fresca"],["av-verde","ds-baja","sp-veg-pizza","t-soft-sup"],["cdb","jal-citrus","ds-midnight","n-chips-cheese"],["ds-pepsi","s-fiesta-pot","s-diablo","veggie-bowl"],["f-midnight","lx-griller","s-fire","t-spicy-potato"],["f-baja","cc-strips","cc-taco-ranch","s-hot"],["water","f-dew","n-chips-guac","s-nacho-fries"],["cc-bowl","cc-crispy","f-drpepper","f-pepsi-zero"],["cc-burrito","f-wild-straw","f-pepsi","s-mild"],["b5l","baja-freeze","f-baja-zero","lx-salad"],["f-lipton-unsweet","f-lipton-sweet","q-steak","t-bb-chalupa"],["f-brisk","f-diet-pepsi","cc-burr-ranch","t-chalupa-beef"],["s-black-beans","s-cinnabon","t-crunchy-sup"],["lx-stacker","n-bellgrande","s-twists"],["gcb","s-bb-rice","sp-enchirito"],["f-starry","cc-bacon-melt","t-crunchy"],["bb-gcb","sp-flatbread","t-dlt"],["bs-beef","pj-fries","t-soft-beef"],["lx-dip","pj-melty","sp-rollup"],["cc-rolled-q","f-trop-lemonade","s-pintos"],["ref-mango","f-mug","sp-mex-pizza"],["ds-lemonade","sp-cws","t-dlt-sup"],["ref-dragon","q-cheese","q-chicken"],["cbr","ref-strawpass","sp-bb-cws"]];
 var PLAN_STOP = {};
 PLAN.forEach(function (ids, i) { ids.forEach(function (id) { PLAN_STOP[id] = i; }); });
+
+/* planned rider per item: one item per rider per stop, calorie-balanced
+   (7,445-7,480 cal and 20-23 items each, 2-3 breakfast items each) */
+var PLAN_RIDER = {"bk-cw-sausage":1,"bk-q-steak":0,"ctb-bacon":2,"cin-coffee-hot":4,"bk-salsa":3,"bk-cw-bacon":1,"gtb-bacon":3,"ctb-sausage":0,"hash-brown":4,"coffee-iced":2,"bk-cal-cw-bacon":1,"bk-q-sausage":4,"ctb-potato":2,"cin-coffee-iced":0,"coffee-hot":3,"gtb-sausage":2,"gtb-steak":3,"bk-q-bacon":0,"oj":1,"t-cgc":4,"pineapple-freeze":0,"ref-rock-punch":1,"ds-baja-zero":2,"t-dcgc":3,"bean-burrito":2,"ref-rock-pine":0,"f-dew-zero":1,"ds-baja-freeze":4,"pj-fresca":1,"cc-soft":0,"f-g2":2,"ds-baja":0,"sp-veg-pizza":3,"t-soft-sup":2,"av-verde":1,"ds-midnight":4,"cdb":1,"n-chips-cheese":2,"jal-citrus":0,"veggie-bowl":3,"ds-pepsi":0,"s-fiesta-pot":2,"s-diablo":1,"lx-griller":4,"f-midnight":1,"t-spicy-potato":2,"s-fire":3,"cc-strips":3,"f-baja":0,"cc-taco-ranch":2,"s-hot":4,"s-nacho-fries":4,"f-dew":1,"n-chips-guac":2,"water":0,"cc-bowl":0,"f-drpepper":3,"cc-crispy":2,"f-pepsi-zero":1,"cc-burrito":1,"f-pepsi":4,"f-wild-straw":2,"s-mild":3,"b5l":3,"baja-freeze":4,"lx-salad":0,"f-baja-zero":1,"q-steak":1,"t-bb-chalupa":2,"f-lipton-sweet":0,"f-lipton-unsweet":4,"cc-burr-ranch":4,"t-chalupa-beef":3,"f-brisk":0,"f-diet-pepsi":2,"s-cinnabon":2,"t-crunchy-sup":1,"s-black-beans":3,"n-bellgrande":0,"lx-stacker":3,"s-twists":1,"gcb":4,"sp-enchirito":1,"s-bb-rice":3,"cc-bacon-melt":3,"f-starry":1,"t-crunchy":0,"bb-gcb":2,"sp-flatbread":4,"t-dlt":0,"pj-fries":1,"bs-beef":0,"t-soft-beef":4,"pj-melty":3,"lx-dip":4,"sp-rollup":2,"cc-rolled-q":0,"f-trop-lemonade":2,"s-pintos":1,"sp-mex-pizza":4,"f-mug":1,"ref-mango":3,"sp-cws":2,"ds-lemonade":0,"t-dlt-sup":3,"q-chicken":4,"q-cheese":3,"ref-dragon":0,"sp-bb-cws":2,"cbr":3,"ref-strawpass":4};
 
 var JERSEYS = ["#FF3D9A","#3EE8D2","#FFC53D","#8FE85C","#B08CFF"];
 var DEFAULT_NAMES = ["Wyatt","Jack","Tyler","Alex","Ryan"];
@@ -327,6 +332,12 @@ function planCal(si) {
   var s = 0;
   (PLAN[si] || []).forEach(function (id) { var it = itemById(id); if (it) s += it[4]; });
   return s;
+}
+function pInit(p) { return esc((state.names[p] || '?').charAt(0)); }
+function planItemLabel(id) {
+  var it = itemById(id); if (!it) return '';
+  var p = PLAN_RIDER[id];
+  return esc(it[2]) + (p != null ? ' <b style="color:' + JERSEYS[p] + '">' + pInit(p) + '</b>' : '');
 }
 function eatenCount() { var n = 0; for (var k in state.items) n++; return n; }
 function stopCounts() {
@@ -478,6 +489,7 @@ var CSS = [
 '.orddots{display:flex;gap:8px;margin-top:8px}',
 '.rdot{width:34px;height:34px;border-radius:50%;border:2px solid transparent;padding:0;font-weight:700;color:#1B0B26;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;opacity:.4}',
 '.rdot.on{opacity:1;border-color:var(--ink)}',
+'.rdot.sug{opacity:.85;border-color:var(--gold);border-style:dashed}',
 '.stopbtns{display:flex;flex-direction:column;gap:6px;align-items:stretch}',
 '.sbtn{border:1px solid var(--line);background:var(--surface2);color:var(--ink);border-radius:8px;padding:7px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;min-width:64px}',
 '.sbtn.done-on{background:var(--teal);border-color:var(--teal);color:#06251f}',
@@ -579,7 +591,7 @@ function renderRace(pct) {
       '<div><div class="addr">' + esc(STOPS[ns][0]) + '</div><div class="city">' + esc(STOPS[ns][1]) + '</div></div>' +
       '<a class="navbtn" target="_blank" rel="noopener" href="' + mapsUrl(ns) + '">Navigate</a>' +
       '</div>' +
-      ((PLAN[ns] || []).length ? '<div class="stopitems plan" style="margin-top:10px" data-editorder="' + ns + '"><em>order plan · ~' + planCal(ns).toLocaleString() + ' cal:</em> ' + PLAN[ns].map(function (id) { var it2 = itemById(id); return it2 ? esc(it2[2]) : ''; }).join(' · ') + '</div>' : '') +
+      ((PLAN[ns] || []).length ? '<div class="stopitems plan" style="margin-top:10px" data-editorder="' + ns + '"><em>order plan · ~' + planCal(ns).toLocaleString() + ' cal:</em> ' + PLAN[ns].map(planItemLabel).join(' · ') + '</div>' : '') +
       '</div>';
   } else {
     h += '<div class="card"><h2>Route</h2><div class="disp" style="font-size:22px;color:var(--gold)">Every stage complete 🏆</div></div>';
@@ -632,7 +644,7 @@ function renderMenu() {
       h += '<button class="itemrow' + (e ? ' done' : '') + '" data-item="' + it[0] + '">' + chip +
         '<span class="nm">' + esc(it[2]) + (it[3] ? ' <span class="note">' + esc(it[3]) + '</span>' : '') +
         (e && e.s != null ? ' <span class="note num">· stage ' + (e.s + 1) + '</span>'
-          : !e && PLAN_STOP[it[0]] != null ? ' <span class="note num">· plan stg ' + (PLAN_STOP[it[0]] + 1) + '</span>' : '') + '</span>' +
+          : !e && PLAN_STOP[it[0]] != null ? ' <span class="note num">· plan stg ' + (PLAN_STOP[it[0]] + 1) + (PLAN_RIDER[it[0]] != null ? ' · ' + pInit(PLAN_RIDER[it[0]]) : '') + '</span>' : '') + '</span>' +
         '<span class="cal num">' + it[4] + (it[8] ? '~' : '') + ' cal</span></button>';
     });
   });
@@ -663,7 +675,7 @@ function renderRoute() {
     } else if (status === 'done') {
       orderHtml = '<div class="stopitems" data-editorder="' + j + '">+ add what was ordered</div>';
     } else if (status !== 'skip' && (PLAN[j] || []).length) {
-      orderHtml = '<div class="stopitems plan" data-editorder="' + j + '"><em>plan · ~' + planCal(j).toLocaleString() + ' cal:</em> ' + PLAN[j].map(function (id) { var it = itemById(id); return it ? esc(it[2]) : ''; }).join(' · ') + '</div>';
+      orderHtml = '<div class="stopitems plan" data-editorder="' + j + '"><em>plan · ~' + planCal(j).toLocaleString() + ' cal:</em> ' + PLAN[j].map(planItemLabel).join(' · ') + '</div>';
     }
     h += '<div class="stoprow' + (status === 'done' ? ' done' : status === 'skip' ? ' skip' : '') + '">' +
       '<div class="stage-badge' + (isFinish ? ' finish' : '') + '" style="width:44px;height:44px"><span class="sn disp num" style="font-size:16px">' + (j + 1) + '</span><span class="sk">' + (isFinish ? 'finish' : 'stage') + '</span></div>' +
@@ -683,6 +695,12 @@ function renderSquad() {
   var totals = playerTotals();
   var maxCal = 0, leader = -1;
   totals.forEach(function (t, i) { if (t.cal > maxCal) { maxCal = t.cal; leader = i; } });
+  var planRider = [];
+  for (var pr = 0; pr < 5; pr++) planRider.push({ n: 0, cal: 0 });
+  for (var pid in PLAN_RIDER) {
+    var pit = itemById(pid);
+    if (pit) { planRider[PLAN_RIDER[pid]].n++; planRider[PLAN_RIDER[pid]].cal += pit[4]; }
+  }
   var h = '';
   if (me < 0) h += '<div class="banner">Tap “this is me” on your card — it makes logging items one tap.</div>';
   for (var p = 0; p < 5; p++) {
@@ -703,7 +721,7 @@ function renderSquad() {
       '<div><div class="mv disp num">' + t.fat + 'g</div><div class="mk">fat</div></div>' +
       '</div>' +
       '<div class="pbar"><i style="width:' + (maxCal ? Math.round(t.cal / maxCal * 100) : 0) + '%;background:' + JERSEYS[p] + '"></i></div>' +
-      '<div style="font-size:12px;color:var(--muted);margin-top:6px" class="num">' + t.items + ' item' + (t.items === 1 ? '' : 's') + ' eaten</div>' +
+      '<div style="font-size:12px;color:var(--muted);margin-top:6px" class="num">' + t.items + ' item' + (t.items === 1 ? '' : 's') + ' eaten · plan: ' + planRider[p].n + ' items / ~' + planRider[p].cal.toLocaleString() + ' cal</div>' +
       '</div>';
   }
   return h;
@@ -721,7 +739,7 @@ function popupHtml(i) {
   var oi = itemsAtStop(i);
   var lines = oi.length
     ? oi.map(function (o) { return esc(o.it[2]) + ' (' + esc((state.names[o.e.p] || '?').charAt(0)) + ')'; }).join('<br>')
-    : 'Plan · ~' + planCal(i).toLocaleString() + ' cal:<br>' + (PLAN[i] || []).map(function (id) { var it = itemById(id); return it ? esc(it[2]) : ''; }).join('<br>');
+    : 'Plan · ~' + planCal(i).toLocaleString() + ' cal:<br>' + (PLAN[i] || []).map(function (id) { var it = itemById(id); var p = PLAN_RIDER[id]; return it ? esc(it[2]) + (p != null ? ' (' + pInit(p) + ')' : '') : ''; }).join('<br>');
   return '<div class="pa">' + (i + 1) + ' · ' + esc(STOPS[i][0]) + '</div>' +
     '<div class="pi">' + lines + '</div>' +
     '<div style="margin-top:6px"><a target="_blank" rel="noopener" href="' + mapsUrl(i) + '">Navigate →</a></div>';
@@ -809,10 +827,11 @@ function openOrderSheet(si) {
 
   function row(it) {
     var e = state.items[it[0]];
+    var sug = !e && PLAN_STOP[it[0]] === si ? PLAN_RIDER[it[0]] : null;
     var dots = '';
     for (var p = 0; p < 5; p++) {
       var on = e && e.p === p && e.s === si;
-      dots += '<button class="rdot' + (on ? ' on' : '') + '" style="background:' + JERSEYS[p] + '" data-oid="' + it[0] + '" data-op="' + p + '">' + esc((state.names[p] || '?').charAt(0)) + '</button>';
+      dots += '<button class="rdot' + (on ? ' on' : sug === p ? ' sug' : '') + '" style="background:' + JERSEYS[p] + '" data-oid="' + it[0] + '" data-op="' + p + '">' + esc((state.names[p] || '?').charAt(0)) + '</button>';
     }
     return '<div class="ordrow' + (e && e.s === si ? ' on' : '') + '">' +
       '<div class="ordname"><span>' + esc(it[2]) + (it[3] ? ' <span class="note">' + esc(it[3]) + '</span>' : '') + '</span>' +
@@ -833,6 +852,7 @@ function openOrderSheet(si) {
     });
     var hh = '';
     if (mine.length) hh += '<div class="ordhead">Ordered here · ' + mine.length + '</div>' + mine.map(row).join('');
+    if (planned.length && !q) hh += '<button class="btn primary" id="logplan" style="width:100%">⚡ Log planned order — ' + planned.length + ' item' + (planned.length === 1 ? '' : 's') + ' as assigned</button>';
     if (planned.length) hh += '<div class="ordhead">Planned for this stop · ~' + planCal(si).toLocaleString() + ' cal</div>' + planned.map(row).join('');
     hh += '<div class="ordhead">' + (q ? 'Matches' : 'Everything else') + '</div>';
     hh += rest.slice(0, 40).map(row).join('');
@@ -847,6 +867,13 @@ function openOrderSheet(si) {
 
   ov.addEventListener('click', function (ev) {
     if (ev.target === ov || ev.target.id === 'closesheet') { ov.remove(); return; }
+    if (ev.target.id === 'logplan') {
+      (PLAN[si] || []).forEach(function (id) {
+        if (!state.items[id] && PLAN_RIDER[id] != null) dispatch({ k: 'item', id: id, p: PLAN_RIDER[id], t: Date.now(), at: si });
+      });
+      draw();
+      return;
+    }
     var dot = ev.target.closest('[data-oid]');
     if (dot) {
       var id = dot.getAttribute('data-oid'), p2 = parseInt(dot.getAttribute('data-op'), 10);
