@@ -510,30 +510,6 @@
   "variant": null
  },
  {
-  "id": "diablo-sauce-packet",
-  "cat": "Sides & Sweets",
-  "name": "Diablo Sauce Packet",
-  "variant": null
- },
- {
-  "id": "fire-sauce-packet",
-  "cat": "Sides & Sweets",
-  "name": "Fire Sauce Packet",
-  "variant": null
- },
- {
-  "id": "hot-sauce-packet",
-  "cat": "Sides & Sweets",
-  "name": "Hot Sauce Packet",
-  "variant": null
- },
- {
-  "id": "mild-sauce-packet",
-  "cat": "Sides & Sweets",
-  "name": "Mild Sauce Packet",
-  "variant": null
- },
- {
   "id": "nacho-fries-regular-large",
   "cat": "Sides & Sweets",
   "name": "Nacho Fries",
