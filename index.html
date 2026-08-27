@@ -319,6 +319,8 @@ function connectStream() {
 
 /* ---------------- derived ---------------- */
 function itemById(id) { for (var i = 0; i < ITEMS.length; i++) if (ITEMS[i][0] === id) return ITEMS[i]; return null; }
+/* drink = the three drink categories, plus Pineapple Freeze (filed under "New") */
+function isDrink(it) { return it[1] === 'Dirty Sodas' || it[1] === 'Drinks' || it[1] === 'Fountain' || it[0] === 'pineapple-freeze'; }
 function itemsAtStop(si) {
   var out = [];
   for (var i = 0; i < ITEMS.length; i++) {
@@ -352,11 +354,12 @@ function overallPct() {
 }
 function playerTotals() {
   var t = [];
-  for (var p = 0; p < 5; p++) t.push({ items: 0, cal: 0, pro: 0, carb: 0, fat: 0 });
+  for (var p = 0; p < 5; p++) t.push({ items: 0, cal: 0, pro: 0, carb: 0, fat: 0, foodCal: 0, drinkCal: 0 });
   for (var id in state.items) {
     var it = itemById(id); if (!it) continue;
     var p2 = state.items[id].p; if (p2 == null || !t[p2]) continue;
     t[p2].items++; t[p2].cal += it[4]; t[p2].pro += it[5]; t[p2].carb += it[6]; t[p2].fat += it[7];
+    if (isDrink(it)) t[p2].drinkCal += it[4]; else t[p2].foodCal += it[4];
   }
   return t;
 }
@@ -610,8 +613,14 @@ function renderRace(pct) {
     h += '<div class="card"><span class="chip warn">🌅 ' + bk + ' breakfast item' + (bk === 1 ? '' : 's') + ' left — sold until ~11 AM</span></div>';
   }
 
+  var foodAll = 0, drinkAll = 0;
+  ITEMS.forEach(function (it) { if (isDrink(it)) drinkAll += it[4]; else foodAll += it[4]; });
+  var foodEaten = 0, drinkEaten = 0;
+  totals.forEach(function (t) { foodEaten += t.foodCal; drinkEaten += t.drinkCal; });
   h += '<div class="card"><h2>Group intake</h2>' +
     '<div class="kv"><span class="k">Calories eaten</span><span class="num"><b>' + calEaten.toLocaleString() + '</b> / ' + calAll.toLocaleString() + '</span></div>' +
+    '<div class="kv"><span class="k">🌮 from food</span><span class="num"><b>' + foodEaten.toLocaleString() + '</b> / ' + foodAll.toLocaleString() + '</span></div>' +
+    '<div class="kv"><span class="k">🥤 from drinks</span><span class="num"><b>' + drinkEaten.toLocaleString() + '</b> / ' + drinkAll.toLocaleString() + '</span></div>' +
     '<div class="kv"><span class="k">Fair share</span><span class="num">~' + Math.round(ITEMS.length / 5) + ' items · ~' + Math.round(calAll / 5).toLocaleString() + ' cal each</span></div>' +
     '<div class="pbar"><i style="width:' + Math.min(100, Math.round(calEaten / calAll * 100)) + '%;background:linear-gradient(90deg,var(--teal),var(--gold))"></i></div>' +
     '</div>';
@@ -751,7 +760,7 @@ function renderSquad() {
     h += '<div class="pcard" style="border-left-color:' + JERSEYS[p] + '">' +
       '<div class="prow1"><span class="pchip" style="background:' + JERSEYS[p] + '">' + esc((state.names[p] || '?').charAt(0)) + '</span>' +
       '<span class="pname disp">' + esc(state.names[p]) + '</span>' +
-      (leader === p && maxCal > 0 ? '<span class="jersey">💛 yellow jersey</span>' : '') +
+      (leader === p && maxCal > 0 ? '<span class="jersey">💛 fattest chud</span>' : '') +
       '</div>' +
       '<div style="display:flex;gap:8px;margin-bottom:10px">' +
       '<button class="mebtn' + (me === p ? ' on' : '') + '" data-me="' + p + '">' + (me === p ? '✓ this is me' : 'this is me') + '</button>' +
@@ -763,6 +772,7 @@ function renderSquad() {
       '<div><div class="mv disp num">' + t.carb + 'g</div><div class="mk">carbs</div></div>' +
       '<div><div class="mv disp num">' + t.fat + 'g</div><div class="mk">fat</div></div>' +
       '</div>' +
+      '<div style="font-size:12px;color:var(--muted);margin-top:8px" class="num">🌮 ' + t.foodCal.toLocaleString() + ' cal food · 🥤 ' + t.drinkCal.toLocaleString() + ' cal drink</div>' +
       '<div class="pbar"><i style="width:' + (maxCal ? Math.round(t.cal / maxCal * 100) : 0) + '%;background:' + JERSEYS[p] + '"></i></div>' +
       '<div style="font-size:12px;color:var(--muted);margin-top:6px" class="num">' + t.items + ' item' + (t.items === 1 ? '' : 's') + ' eaten · plan: ' + planRider[p].n + ' items / ~' + planRider[p].cal.toLocaleString() + ' cal</div>' +
       '</div>';
