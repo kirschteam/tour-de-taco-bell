@@ -138,42 +138,45 @@ var ITEMS = [
 
 var CAT_ORDER = ["Breakfast","Burritos","Cantina Chicken","Dirty Sodas","Drinks","Fountain","Luxe Value","Nachos","New","Quesadillas","Sides & Sweets","Specialties","Tacos","Veggie Cravings"];
 
-/* [address, city] in route order; last = the finish */
+/* [address, city] in route order; last = the finish.
+   Order minimizes total drive time (OpenRouteService driving matrix + 2-opt/or-opt,
+   free start, finish fixed at 168th & Maple): ~3h43m / ~104 mi vs 4h11m / ~119 mi
+   for the old CB-first order. */
 var STOPS = [
-["318 E Broadway","Council Bluffs, IA"],
-["1114 Woodbury Ave","Council Bluffs, IA"],
-["3150 Dial Dr","Council Bluffs, IA"],
-["2759 W Broadway","Council Bluffs, IA"],
-["7516 N 30th St","Omaha (Florence)"],
-["6110 N 72nd St","Omaha"],
-["5139 N 90th St","Omaha"],
-["3211 N 108th St","Omaha"],
-["7051 Dodge St","Omaha (Midtown)"],
-["3855 Dodge St","Omaha (Midtown)"],
-["3917 S 42nd St","Omaha (South)"],
-["4801 L St","Omaha (South)"],
 ["1506 Galvin Rd S","Bellevue"],
 ["10110 S 15th St","Bellevue"],
 ["4105 Twin Creek Dr","Bellevue"],
 ["7710 Olson Dr","Papillion"],
 ["8013 S 84th St","La Vista"],
-["4810 S 72nd St","Omaha (Ralston)"],
-["2812 S 84th St","Omaha"],
-["12075 W Center Rd","Omaha"],
-["14554 W Center Rd","Omaha"],
 ["5310 S 108th St","Omaha (Millard)"],
 ["13725 Q St","Omaha (Millard)"],
-["16845 Polk Plaza","Omaha"],
 ["16116 Stevens Pointe Cir","Gretna"],
+["16845 Polk Plaza","Omaha"],
 ["6601 S 205th St","Elkhorn"],
-["18370 Wright St","Omaha (West)"],
 ["700 N 204th Ave Cir","Elkhorn"],
+["18370 Wright St","Omaha (West)"],
+["14554 W Center Rd","Omaha"],
+["12075 W Center Rd","Omaha"],
+["2812 S 84th St","Omaha"],
+["7051 Dodge St","Omaha (Midtown)"],
+["4810 S 72nd St","Omaha (Ralston)"],
+["4801 L St","Omaha (South)"],
+["3917 S 42nd St","Omaha (South)"],
+["3150 Dial Dr","Council Bluffs, IA"],
+["1114 Woodbury Ave","Council Bluffs, IA"],
+["318 E Broadway","Council Bluffs, IA"],
+["2759 W Broadway","Council Bluffs, IA"],
+["3855 Dodge St","Omaha (Midtown)"],
+["7516 N 30th St","Omaha (Florence)"],
+["6110 N 72nd St","Omaha"],
+["5139 N 90th St","Omaha"],
+["3211 N 108th St","Omaha"],
 ["14606 W Maple Rd","Omaha"],
 ["17130 Evans Plz","Omaha · 168th & Maple"]
 ];
 
 /* [lat, lng] per stop, same order as STOPS (geocoded via OSM Nominatim) */
-var COORDS = [[41.26483,-95.8415],[41.24168,-95.82626],[41.22887,-95.84966],[41.26165,-95.88856],[41.32834,-95.95829],[41.31453,-96.02446],[41.30539,-96.05202],[41.288,-96.08072],[41.2593,-96.02192],[41.25933,-95.97077],[41.22099,-95.97537],[41.2127,-95.9862],[41.14438,-95.91225],[41.1593,-95.93593],[41.14064,-95.97509],[41.1379,-96.02824],[41.17944,-96.04324],[41.21106,-96.02444],[41.23296,-96.04367],[41.23394,-96.1017],[41.23444,-96.14239],[41.20442,-96.08176],[41.20466,-96.12773],[41.19135,-96.19969],[41.14463,-96.16281],[41.19262,-96.2353],[41.23352,-96.20255],[41.26799,-96.23492],[41.29274,-96.14228],[41.2915,-96.18284]];
+var COORDS = [[41.14438,-95.91225],[41.1593,-95.93593],[41.14064,-95.97509],[41.1379,-96.02824],[41.17944,-96.04324],[41.20442,-96.08176],[41.20466,-96.12773],[41.14463,-96.16281],[41.19135,-96.19969],[41.19262,-96.2353],[41.26799,-96.23492],[41.23352,-96.20255],[41.23444,-96.14239],[41.23394,-96.1017],[41.23296,-96.04367],[41.2593,-96.02192],[41.21106,-96.02444],[41.2127,-95.9862],[41.22099,-95.97537],[41.22887,-95.84966],[41.24168,-95.82626],[41.26483,-95.8415],[41.26165,-95.88856],[41.25933,-95.97077],[41.32834,-95.95829],[41.31453,-96.02446],[41.30539,-96.05202],[41.288,-96.08072],[41.29274,-96.14228],[41.2915,-96.18284]];
 
 /* planned order per stop: breakfast + coffee/OJ at stops 1-4 (gone by 11 AM),
    caffeinated drinks all placed by stop 18 (Rockstar energy at stops 5-6),
