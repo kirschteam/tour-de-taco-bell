@@ -1,13 +1,13 @@
 # Tour de Taco Bell
 
-A mobile web app for tracking a one-day driving tour (one car, Tesla Model Y) of every Taco Bell in the Omaha/Council Bluffs metro: 30 stops, 65 menu items, 5 riders. The goal is to visit every store and collectively order and finish the whole menu along the way — one representative of each item family (variant duplicates like chicken/steak/cheese quesadillas collapse to the lowest-calorie one, and multi-size items are ordered at the smallest size). Full 107-item menu lives in `items.json`. Race day: 2026-08-30.
+A mobile web app for tracking a one-day driving tour (one car, Tesla Model Y) of every Taco Bell in the Omaha/Council Bluffs metro: 30 stops, 107 menu items, 5 riders. The goal is to visit every store and collectively order and finish the entire menu along the way, with every multi-size item ordered at its smallest size (16 oz fountain drinks, regular freezes/fries, 2 pc strips, 2 pk Cinnabon Delights). Race day: 2026-08-30.
 
 ## The app
 
 Everything lives in `index.html`: a single self-contained page (no build step, no framework) designed to run on phones. Tabs:
 
 - **Race**: live progress, per-rider standings, pace vs. the 11 AM breakfast cutoff, completion % (weighted 70% items / 30% stops).
-- **Menu**: all 65 items grouped by category with calories/macros, searchable, tap to claim/log an item for a rider.
+- **Menu**: all 107 items grouped by category with calories/macros, searchable, tap to claim/log an item for a rider.
 - **Route**: the 30 stops in order with done/skip status and Google Maps directions links.
 - **Map**: Leaflet map of all stops with live status markers.
 - **Plan**: the pre-computed order sheet, per stop and per rider.
@@ -17,9 +17,9 @@ Everything lives in `index.html`: a single self-contained page (no build step, n
 Item-to-stop and item-to-rider assignments are precomputed in the `PLAN` and `PLAN_RIDER` constants:
 
 - Breakfast items and coffee/OJ at stops 1-4 (breakfast ends ~11 AM).
-- All caffeinated drinks placed by stop 18, the Rockstar energy drink early (stop 5).
-- Stops calorie-balanced to roughly 490-730 cal each, max 2 drinks per stop.
-- Riders balanced to ~3,625 cal (3,140-3,395 food / 340-420 drink) and 13 items each.
+- All caffeinated drinks placed by stop 18, Rockstar energy drinks early (stops 5-6).
+- Stops calorie-balanced to roughly 900-1,070 cal each, max 2 drinks per stop.
+- Riders balanced to ~6,540 cal (5,310-5,740 food / 990-1,080 drink) and 21-22 items each.
 
 ### The route
 
