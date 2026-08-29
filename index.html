@@ -94,6 +94,7 @@ var ITEMS = [
 ["t-chalupa-beef","Tacos","Chalupa Supreme® - Beef","",360,13,31,20,0],
 ["t-cgc","Tacos","Cheesy Gordita Crunch","",500,20,41,28,0],
 ["t-crunchy","Tacos","Crunchy Taco","",170,8,13,9,0],
+["t-dcgc","Tacos","Doritos® Cheesy Gordita Crunch - Nacho Cheese","",510,20,42,29,1],
 ["t-dlt","Tacos","Nacho Cheese Doritos® Locos Taco","",170,8,13,9,0],
 ["t-soft-beef","Tacos","Soft Taco - Beef","",180,9,18,8,0],
 ["t-spicy-potato","Tacos","Spicy Potato Soft Taco","",240,6,29,12,0]
@@ -143,15 +144,15 @@ var COORDS = [[41.14438,-95.91225],[41.1593,-95.93593],[41.14064,-95.97509],[41.
 
 /* planned order per stop: breakfast + coffee/OJ at stops 1-4 (gone by 11 AM),
    caffeinated drinks all placed by stop 18 (Rockstar energy at stop 5),
-   the rest calorie-balanced (~560-740 cal/stop), max 2 drinks per stop */
-var PLAN = [["bk-cw-sausage"],["gtb-sausage","coffee-hot","bk-salsa"],["bk-q-sausage","oj"],["ctb-sausage","cin-coffee-hot","hash-brown"],["ref-rock-punch","cdb","av-verde"],["f-baja","lx-salad","cc-soft"],["f-lipton-sweet","bs-beef","t-soft-beef"],["f-brisk","cbr","t-dlt"],["f-drpepper","sp-flatbread"],["ds-baja","cc-crispy","sp-rollup"],["f-pepsi","sp-enchirito","jal-citrus"],["f-trop-lemonade","bean-burrito"],["n-bellgrande"],["f-dew","lx-stacker"],["baja-freeze","cc-taco-ranch","s-bb-rice"],["gcb"],["pj-fries"],["pj-melty"],["cc-rolled-q"],["sp-mex-pizza","s-cinnabon"],["ref-strawpass","lx-griller"],["sp-cws","s-twists"],["f-mug","s-nacho-fries","t-crunchy"],["q-chicken","s-pintos"],["cc-burr-ranch","t-spicy-potato"],["t-cgc","n-chips-cheese"],["water","cc-bowl","s-fiesta-pot"],["f-g2","cc-burrito"],["f-starry","t-chalupa-beef"],["b5l","cc-strips"]];
+   the rest calorie-balanced (~570-750 cal/stop), max 2 drinks per stop */
+var PLAN = [["bk-cw-sausage"],["gtb-sausage","coffee-hot","bk-salsa"],["bk-q-sausage","oj"],["ctb-sausage","cin-coffee-hot","hash-brown"],["ref-rock-punch","lx-griller"],["f-baja","s-nacho-fries","t-soft-beef"],["f-lipton-sweet","cbr","s-twists"],["f-brisk","cdb","jal-citrus"],["f-drpepper","bs-beef"],["ds-baja","lx-salad","sp-rollup"],["f-pepsi","sp-flatbread"],["f-trop-lemonade","t-chalupa-beef"],["n-bellgrande"],["f-dew","bean-burrito","t-crunchy"],["baja-freeze","cc-crispy","cc-soft"],["gcb"],["pj-fries"],["pj-melty"],["cc-rolled-q","av-verde"],["sp-mex-pizza","s-bb-rice"],["ref-strawpass","cc-burrito"],["sp-cws","s-pintos"],["f-mug","lx-stacker","t-dlt"],["q-chicken","t-spicy-potato"],["t-dcgc","n-chips-cheese"],["cc-burr-ranch","cc-strips"],["water","b5l","cc-taco-ranch"],["f-g2","cc-bowl"],["f-starry","sp-enchirito","s-cinnabon"],["t-cgc","s-fiesta-pot"]];
 var PLAN_STOP = {};
 PLAN.forEach(function (ids, i) { ids.forEach(function (id) { PLAN_STOP[id] = i; }); });
 
 /* planned rider per item: one item per rider per stop, balanced on food AND
-   drink calories (food 3,270-3,525 · drink 480-640 · total 3,865-4,145),
-   13 items each, 2-3 breakfast-stop items, 2-3 caffeinated drinks each */
-var PLAN_RIDER = {"bk-cw-sausage":0,"gtb-sausage":2,"coffee-hot":4,"bk-salsa":3,"bk-q-sausage":3,"oj":1,"ctb-sausage":4,"cin-coffee-hot":3,"hash-brown":1,"ref-rock-punch":2,"cdb":1,"av-verde":4,"f-baja":0,"lx-salad":4,"cc-soft":3,"f-lipton-sweet":4,"bs-beef":2,"t-soft-beef":1,"f-brisk":2,"cbr":4,"t-dlt":0,"f-drpepper":1,"sp-flatbread":3,"ds-baja":3,"cc-crispy":1,"sp-rollup":0,"f-pepsi":4,"sp-enchirito":2,"jal-citrus":0,"f-trop-lemonade":0,"bean-burrito":1,"n-bellgrande":4,"f-dew":2,"lx-stacker":0,"baja-freeze":1,"cc-taco-ranch":3,"s-bb-rice":2,"gcb":3,"pj-fries":0,"pj-melty":1,"cc-rolled-q":2,"sp-mex-pizza":4,"s-cinnabon":2,"ref-strawpass":4,"lx-griller":1,"sp-cws":0,"s-twists":3,"f-mug":3,"s-nacho-fries":2,"t-crunchy":4,"q-chicken":3,"s-pintos":1,"cc-burr-ranch":4,"t-spicy-potato":2,"t-cgc":0,"n-chips-cheese":1,"water":0,"cc-bowl":2,"s-fiesta-pot":3,"f-g2":0,"cc-burrito":1,"f-starry":2,"t-chalupa-beef":4,"b5l":3,"cc-strips":0};
+   drink calories (food 3,325-3,600 · drink 510-630 · total 3,835-4,230),
+   13-14 items each, 2-3 breakfast-stop items, 2-3 caffeinated drinks each */
+var PLAN_RIDER = {"bk-cw-sausage":4,"gtb-sausage":1,"coffee-hot":3,"bk-salsa":2,"bk-q-sausage":2,"oj":0,"ctb-sausage":3,"cin-coffee-hot":2,"hash-brown":0,"ref-rock-punch":1,"lx-griller":0,"f-baja":4,"s-nacho-fries":3,"t-soft-beef":2,"f-lipton-sweet":3,"cbr":1,"s-twists":0,"f-brisk":1,"cdb":3,"jal-citrus":4,"f-drpepper":0,"bs-beef":2,"ds-baja":2,"lx-salad":4,"sp-rollup":0,"f-pepsi":3,"sp-flatbread":1,"f-trop-lemonade":1,"t-chalupa-beef":4,"n-bellgrande":0,"f-dew":4,"bean-burrito":3,"t-crunchy":2,"baja-freeze":0,"cc-crispy":2,"cc-soft":1,"gcb":4,"pj-fries":3,"pj-melty":1,"cc-rolled-q":2,"av-verde":0,"sp-mex-pizza":0,"s-bb-rice":4,"ref-strawpass":2,"cc-burrito":3,"sp-cws":2,"s-pintos":1,"f-mug":3,"lx-stacker":4,"t-dlt":0,"q-chicken":1,"t-spicy-potato":0,"t-dcgc":4,"n-chips-cheese":3,"cc-burr-ranch":2,"cc-strips":0,"water":4,"b5l":3,"cc-taco-ranch":1,"f-g2":1,"cc-bowl":4,"f-starry":4,"sp-enchirito":1,"s-cinnabon":2,"t-cgc":0,"s-fiesta-pot":3};
 
 var JERSEYS = ["#FF3D9A","#3EE8D2","#FFC53D","#8FE85C","#B08CFF"];
 var DEFAULT_NAMES = ["Wyatt","Jack","Tyler","Alex","Ryan"];
