@@ -1,17 +1,16 @@
 # Stop verification — checked 2026-08-29 for race day Sunday 2026-08-30
 
-All 30 stops have live official locations.tacobell.com pages with posted hours and no
-closure banners. 29 are clean; one needs a phone call. The late Sunday openers no
-longer collide with anything after the 2026-08-29 re-optimization.
+All 30 stops verified open. Live official locations.tacobell.com pages with posted
+hours and no closure banners; the one flag (Harvey Oaks remodel) was cleared by phone.
+The late Sunday openers no longer collide with anything after the 2026-08-29
+re-optimization.
 
 ## Flags
 
-1. **14554 W Center Rd (Harvey Oaks, stage 22) — CALL BEFORE RACE DAY: (402) 330-0224.**
-   Grow Omaha reported (~2026-05-04) this store temporarily closed for a full interior/
-   exterior renovation (https://growomaha.com/news-briefs/taco-bell-renovating-harvey-oaks-location/).
-   The official page is back to showing normal hours (Sun 8 AM–2 AM drive-thru) which
-   suggests it reopened, but no reopening news was found and the page can lag. This is
-   the only stop at real risk of being dark.
+1. **14554 W Center Rd (Harvey Oaks, stage 22) — CONFIRMED OPEN by phone 2026-08-29.**
+   Grow Omaha had reported (~2026-05-04) a temporary closure for renovation
+   (https://growomaha.com/news-briefs/taco-bell-renovating-harvey-oaks-location/);
+   Wyatt called and confirmed the store is open and operating.
 
 2. **5310 S 108th St — opens 10:00 AM Sunday** (7 AM the rest of the week). Resolved by
    the 2026-08-29 re-optimization: it is now stage 15, arrival ~12:19 PM.
@@ -50,7 +49,7 @@ assume 8 min per Taco Bell.
 | 19 | 6601 S 205th St, Elkhorn | 1:24 PM | 7:00 AM | 12:00 AM |
 | 20 | 700 N 204th Ave Cir, Elkhorn | 1:43 PM | 7:00 AM | 2:00 AM |
 | 21 | 18370 Wright St, Omaha | 2:00 PM | 7:00 AM | 2:00 AM |
-| 22 | 14554 W Center Rd, Omaha | 2:15 PM | 8:00 AM | 2:00 AM — **remodel flag, call** |
+| 22 | 14554 W Center Rd, Omaha | 2:15 PM | 8:00 AM | 2:00 AM |
 | 23 | 12075 W Center Rd, Omaha | 2:28 PM | 7:00 AM | 2:00 AM |
 | 24 | ⚡ Supercharger, 8809 W Center Rd | 2:41 PM | 24/7 | |
 | 25 | 2812 S 84th St, Omaha | 3:09 PM | 7:00 AM | 2:00 AM |
@@ -73,7 +72,7 @@ closures/remodels.
   breakfast cutoff. Stage 5's Luxe Griller at 9:29 AM is the earliest non-breakfast
   food item; a few stores hold the full menu until ~9–10 AM, so it may slide to a
   later stop if refused.
-- The only two metro closures found are NOT on the route: 6206 Ames Ave (permanently
-  closed per Yelp) and the Harvey Oaks remodel above (which IS stop 13 — hence the flag).
+- The only permanent metro closure found (6206 Ames Ave, per Yelp) is not on the route;
+  the Harvey Oaks remodel (stage 22) is confirmed reopened.
 - Hours are as posted 2026-08-29; a same-morning sanity check in the Taco Bell app
-  (closed stores grey out) is a cheap final confirm, especially for stop 13.
+  (closed stores grey out) is a cheap final confirm.
