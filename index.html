@@ -166,6 +166,8 @@ var PLAN_RIDER = {"bk-cw-sausage":4,"gtb-sausage":1,"coffee-hot":3,"bk-salsa":2,
 
 var JERSEYS = ["#FF3D9A","#3EE8D2","#FFC53D","#8FE85C","#B08CFF"];
 var DEFAULT_NAMES = ["Wyatt","Jack","Tyler","Alex","Ryan"];
+var RANK_BADGES = ["💛 fattest chud","🥈 second stomach","🥉 bronze burrito","🫘 bean counter","💀 lettuce boy"];
+var RANK_PREFIX = ["💛","🥈","🥉","🫘","💀"];
 var RACE_DAY = "2026-08-30";
 var BK_CUTOFF_H = 11;           /* breakfast sold until ~11 AM */
 var PRESTART_MIN_PER_STOP = 16; /* pre-start pace guess */
@@ -346,6 +348,35 @@ function playerTotals() {
   return t;
 }
 function groupCalTotal() { var s = 0; for (var i = 0; i < ITEMS.length; i++) s += ITEMS[i][4]; return s; }
+/* 0-based competition rank per rider (ties share a rank); -1 = unranked (0 cal) */
+function squadRanks(totals) {
+  return totals.map(function (t) {
+    if (!t.cal) return -1;
+    var above = 0;
+    totals.forEach(function (o) { if (o.cal > t.cal) above++; });
+    return above;
+  });
+}
+/* squad Crunchkin: group pet, evolves on fraction of total planned calories eaten */
+var CRUNCH_STAGES = [           /* [minFrac, art, name, status line] */
+  [0,   '🥚',      'Seasoned Egg',     'It sleeps in the sauce-packet drawer. Feed it.'],
+  [.10, '🐣',      'Crunchling',       'It has tasted beef. There is no going back.'],
+  [.35, '🌮😬',    'Teenage Cruncho',  'Moody. Demands Baja Blast.'],
+  [.65, '🌮😎',    'Cruncho',          'Fully shelled. Radiating mild-sauce energy.'],
+  [.90, '✨🌮✨',  'Grande Cruncho',   'On the verge of ascension. Do not stop feeding.'],
+  [1,   '👑🌮🔥',  'Ascended Cruncho', 'It has become one with the Bell. Live Más.']
+];
+function crunchkinInfo(calEaten, calAll) {
+  var frac = calAll ? calEaten / calAll : 0, si = 0;
+  for (var i = 0; i < CRUNCH_STAGES.length; i++) if (frac >= CRUNCH_STAGES[i][0]) si = i;
+  var cur = CRUNCH_STAGES[si], nxt = CRUNCH_STAGES[si + 1] || null;
+  var lo = cur[0] * calAll, hi = nxt ? nxt[0] * calAll : calAll;
+  return {
+    art: cur[1], name: cur[2], line: cur[3], stage: si, n: CRUNCH_STAGES.length,
+    pct: nxt ? Math.min(100, Math.round((calEaten - lo) / Math.max(1, hi - lo) * 100)) : 100,
+    toNext: nxt ? Math.max(0, Math.ceil(hi - calEaten)) : 0, final: !nxt
+  };
+}
 function nextStopIdx() {
   for (var i = 0; i < STOPS.length; i++) { var st = state.stops[i]; if (!st || (st.s !== 'done' && st.s !== 'skip')) return i; }
   return -1;
@@ -504,6 +535,8 @@ var CSS = [
 '.tabbtn.on{color:var(--ink)}.tabbtn.on .lb{color:var(--pink)}',
 '.banner{background:#4a1030;border:1px solid var(--pink);color:var(--ink);border-radius:12px;padding:10px 12px;font-size:13px;margin-bottom:12px}',
 '.finish-note{text-align:center;color:var(--muted);font-size:12px;margin:16px 0 4px}',
+'.crunchwrap{display:flex;align-items:center;gap:14px}',
+'.crunchpet{flex:0 0 auto;font-size:44px;line-height:1;filter:drop-shadow(0 3px 6px rgba(0,0,0,.45))}',
 '.resetwrap{text-align:center;margin:20px 0 8px}'
 ].join('\n');
 
@@ -595,6 +628,17 @@ function renderRace(pct) {
   if (bk > 0 && isRaceMorning()) {
     h += '<div class="card"><span class="chip warn">🌅 ' + bk + ' breakfast item' + (bk === 1 ? '' : 's') + ' left — sold until ~11 AM</span></div>';
   }
+
+  var ck = crunchkinInfo(calEaten, calAll);
+  h += '<div class="card"><h2>Squad Crunchkin</h2><div class="crunchwrap">' +
+    '<div class="crunchpet">' + ck.art + '</div>' +
+    '<div style="flex:1;min-width:0"><div class="disp" style="font-size:20px">' + ck.name +
+    ' <span style="font-size:11px;color:var(--muted)" class="num">· stage ' + (ck.stage + 1) + '/' + ck.n + '</span></div>' +
+    '<div style="font-size:12px;color:var(--muted);margin-top:2px">' + ck.line + '</div>' +
+    '<div class="pbar" style="margin-top:8px"><i style="width:' + ck.pct + '%;background:linear-gradient(90deg,var(--pink),var(--gold))"></i></div>' +
+    '<div class="num" style="font-size:11px;color:var(--muted);margin-top:4px">' +
+    (ck.final ? 'final form achieved 🔔' : ck.toNext.toLocaleString() + ' cal to next evolution') + '</div>' +
+    '</div></div></div>';
 
   var foodAll = 0, drinkAll = 0;
   ITEMS.forEach(function (it) { if (isDrink(it)) drinkAll += it[4]; else foodAll += it[4]; });
@@ -734,8 +778,9 @@ function renderPlan() {
 
 function renderSquad() {
   var totals = playerTotals();
-  var maxCal = 0, leader = -1;
-  totals.forEach(function (t, i) { if (t.cal > maxCal) { maxCal = t.cal; leader = i; } });
+  var ranks = squadRanks(totals);
+  var maxCal = 0;
+  totals.forEach(function (t) { maxCal = Math.max(maxCal, t.cal); });
   var planRider = [];
   for (var pr = 0; pr < 5; pr++) planRider.push({ n: 0, cal: 0 });
   for (var pid in PLAN_RIDER) {
@@ -745,14 +790,14 @@ function renderSquad() {
   var h = '<div class="filters" style="position:static;top:auto">' + [['cards', 'Cards'], ['chart', 'Chart']].map(function (v) {
     return '<button class="fbtn' + (squadView === v[0] ? ' on' : '') + '" data-squadview="' + v[0] + '">' + v[1] + '</button>';
   }).join('') + '</div>';
-  if (squadView === 'chart') return h + renderSquadChart(totals, leader);
+  if (squadView === 'chart') return h + renderSquadChart(totals, ranks);
   if (me < 0) h += '<div class="banner">Tap “this is me” on your card — it makes logging items one tap.</div>';
   for (var p = 0; p < 5; p++) {
     var t = totals[p];
     h += '<div class="pcard" style="border-left-color:' + JERSEYS[p] + '">' +
       '<div class="prow1"><span class="pchip" style="background:' + JERSEYS[p] + '">' + esc((state.names[p] || '?').charAt(0)) + '</span>' +
       '<span class="pname disp">' + esc(state.names[p]) + '</span>' +
-      (leader === p && maxCal > 0 ? '<span class="jersey">💛 fattest chud</span>' : '') +
+      (ranks[p] >= 0 ? '<span class="jersey">' + RANK_BADGES[ranks[p]] + '</span>' : '') +
       '</div>' +
       '<div style="display:flex;gap:8px;margin-bottom:10px">' +
       '<button class="mebtn' + (me === p ? ' on' : '') + '" data-me="' + p + '">' + (me === p ? '✓ this is me' : 'this is me') + '</button>' +
@@ -772,7 +817,7 @@ function renderSquad() {
   return h;
 }
 
-function renderSquadChart(totals, leader) {
+function renderSquadChart(totals, ranks) {
   var peak = 400;
   totals.forEach(function (t) { peak = Math.max(peak, t.cal); });
   var steps = [100, 200, 250, 500, 1000, 2000, 2500, 5000], step = steps[steps.length - 1];
@@ -798,7 +843,7 @@ function renderSquadChart(totals, leader) {
         'H' + (x0 + bw - r) + 'Q' + (x0 + bw) + ' ' + ty + ' ' + (x0 + bw) + ' ' + (ty + r) + 'V' + (padT + ph) + 'Z" fill="' + JERSEYS[p] + '"/>';
     }
     svg += '<text x="' + cx + '" y="' + (ty - 6) + '" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)" class="num">' + t.cal.toLocaleString() + '</text>' +
-      '<text x="' + cx + '" y="' + (H - padB + 16) + '" text-anchor="middle" font-size="11" fill="var(--muted)">' + (leader === p && t.cal > 0 ? '💛 ' : '') + esc(state.names[p]) + '</text>';
+      '<text x="' + cx + '" y="' + (H - padB + 16) + '" text-anchor="middle" font-size="11" fill="var(--muted)">' + (ranks[p] >= 0 ? RANK_PREFIX[ranks[p]] + ' ' : '') + esc(state.names[p]) + '</text>';
   }
   svg += '</svg>';
   return '<div class="card"><h2>Calories eaten</h2>' + svg + '</div>';
@@ -807,10 +852,12 @@ function renderSquadChart(totals, leader) {
 /* ---------------- map (Leaflet, lazy-loaded) ---------------- */
 var map = null, mapMarkers = [], leafletLoading = false;
 
+function stopHue(i) { return Math.round(330 + 75 * i / (STOPS.length - 1)) % 360; }
 function mapIcon(i) {
   var st = state.stops[i], ns = nextStopIdx();
   var cls = st && st.s === 'done' ? ' done' : st && st.s === 'skip' ? ' skip' : i === ns ? ' next' : '';
-  return L.divIcon({ className: '', html: '<div class="mdot' + cls + '">' + (isCharger(i) ? '⚡' : (i + 1)) + '</div>', iconSize: [26, 26], iconAnchor: [13, 13] });
+  var style = cls === '' ? ' style="border-color:hsl(' + stopHue(i) + ',95%,62%)"' : '';
+  return L.divIcon({ className: '', html: '<div class="mdot' + cls + '"' + style + '>' + (isCharger(i) ? '⚡' : (i + 1)) + '</div>', iconSize: [26, 26], iconAnchor: [13, 13] });
 }
 function popupHtml(i) {
   var oi = itemsAtStop(i);
@@ -841,7 +888,7 @@ function initMap() {
     document.head.appendChild(s);
     return;
   }
-  w.innerHTML = '<div id="map"></div><div class="maplegend"><span><i style="background:#FFC53D"></i>next</span><span><i style="background:#3EE8D2"></i>done</span><span><i style="background:#3A1B55;border:1px solid #FF3D9A"></i>to go</span></div>';
+  w.innerHTML = '<div id="map"></div><div class="maplegend"><span><i style="background:#FFC53D"></i>next</span><span><i style="background:#3EE8D2"></i>done</span><span><i style="background:linear-gradient(135deg,#FF3D9A,#FFC53D)"></i>to go</span></div>';
   map = L.map('map', { zoomControl: false });
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap', maxZoom: 19 }).addTo(map);
   L.polyline(COORDS, { color: '#FF3D9A', weight: 3, opacity: .75 }).addTo(map);
