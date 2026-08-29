@@ -25,21 +25,17 @@ var DB_URL = 'https://tour-de-taco-bell-default-rtdb.firebaseio.com/';
 var DB_PATH = '/tour-de-taco-bell-2026';
 
 /* ---------------- static data ---------------- */
-/* [id, category, name, sizeNote, cal, protein, carbs, fat, est] — largest size everywhere */
+/* [id, category, name, sizeNote, cal, protein, carbs, fat, est]
+   Slimmed-down menu: variant duplicates (protein/flavor/supreme/zero-sugar versions of
+   the same item) collapsed to their lowest-calorie member, and every multi-size item
+   at its SMALLEST size (16 oz fountain, regular freeze/refresca/fries, 2 pc strips,
+   2 pk Cinnabon). Full 107-item menu: items.json / git history. */
 var ITEMS = [
 ["bk-cal-cw-bacon","Breakfast","Breakfast California Crunchwrap - Bacon","",630,21,51,38,1],
-["bk-cw-bacon","Breakfast","Breakfast Crunchwrap - Bacon","",670,21,51,42,0],
-["bk-cw-sausage","Breakfast","Breakfast Crunchwrap - Sausage Patty","",720,21,50,47,0],
 ["bk-q-bacon","Breakfast","Breakfast Quesadilla - Bacon","",510,19,38,31,0],
-["bk-q-sausage","Breakfast","Breakfast Quesadilla - Sausage","",560,19,38,36,0],
-["bk-q-steak","Breakfast","Breakfast Quesadilla - Steak","",520,22,38,29,0],
 ["bk-salsa","Breakfast","Breakfast Salsa Packet","",5,0,1,0,0],
 ["ctb-bacon","Breakfast","Cheesy Toasted Breakfast Burrito - Bacon","",340,13,34,17,0],
-["ctb-potato","Breakfast","Cheesy Toasted Breakfast Burrito - Fiesta Potato","",350,9,41,17,0],
-["ctb-sausage","Breakfast","Cheesy Toasted Breakfast Burrito - Sausage","",350,12,34,19,0],
 ["gtb-bacon","Breakfast","Grande Toasted Breakfast Burrito - Bacon","",560,22,51,30,0],
-["gtb-sausage","Breakfast","Grande Toasted Breakfast Burrito - Sausage","",570,20,51,32,0],
-["gtb-steak","Breakfast","Grande Toasted Breakfast Burrito - Steak","",570,24,51,29,0],
 ["hash-brown","Breakfast","Hash Brown","",160,1,15,11,0],
 ["bean-burrito","Burritos","Bean Burrito","",350,13,54,9,0],
 ["b5l","Burritos","Beefy 5-Layer Burrito","",490,18,63,18,0],
@@ -47,91 +43,57 @@ var ITEMS = [
 ["bs-beef","Burritos","Burrito Supreme® - Beef","",390,16,51,14,0],
 ["cbr","Burritos","Cheesy Bean & Rice Burrito","",420,9,55,18,0],
 ["cdb","Burritos","Cheesy Double Beef Burrito","",450,17,52,20,0],
-["gcb","Burritos","Grilled Cheese Burrito","",710,27,79,32,0],
 ["av-verde","Cantina Chicken","Avocado Salsa Verde Packet","",25,0,1,2,1],
-["cc-bowl","Cantina Chicken","Cantina Chicken Bowl","",490,27,41,25,0],
 ["cc-burrito","Cantina Chicken","Cantina Chicken Burrito","",490,24,50,22,0],
 ["cc-crispy","Cantina Chicken","Cantina Chicken Crispy Taco","",260,12,18,15,0],
 ["cc-rolled-q","Cantina Chicken","Cantina Chicken Rolled Quesadilla","",570,28,48,30,0],
 ["cc-soft","Cantina Chicken","Cantina Chicken Soft Taco","",190,12,17,8,0],
 ["jal-citrus","Cantina Chicken","Jalapeno Citrus Salsa Packet","",10,0,2,0,1],
-["ds-baja","Dirty Sodas","Mtn Dew® Baja Blast™ Dirty Soda","large",460,0,110,2,0],
-["ds-baja-freeze","Dirty Sodas","Mtn Dew® Baja Blast™ Dirty Soda Freeze","large",480,0,112,2,1],
-["ds-baja-zero","Dirty Sodas","Mtn Dew® Baja Blast™ Zero Sugar Dirty Soda","large",60,0,12,2,0],
-["ds-midnight","Dirty Sodas","Mtn Dew® Baja Midnight Dirty Soda","large",460,0,110,2,1],
-["ds-pepsi","Dirty Sodas","Pepsi® Dirty Soda","large",430,0,104,2,1],
-["ds-lemonade","Dirty Sodas","Tropicana® Dirty Lemonade","large",400,0,96,2,1],
-["cin-coffee-hot","Drinks","Cinnabon® Delights™ Coffee","hot · large",200,1,36,5,1],
-["cin-coffee-iced","Drinks","Cinnabon® Delights™ Coffee","iced · large",220,1,40,5,1],
-["coffee-hot","Drinks","Coffee with Creamer","hot · large",60,0,9,2,1],
-["coffee-iced","Drinks","Coffee with Creamer","iced · large",70,0,10,2,1],
-["baja-freeze","Drinks","Mtn Dew® Baja Blast Freeze™","large",320,0,86,0,1],
+["ds-baja-zero","Dirty Sodas","Mtn Dew® Baja Blast™ Zero Sugar Dirty Soda","small",30,0,6,1,1],
+["cin-coffee-hot","Drinks","Cinnabon® Delights™ Coffee","hot · regular",160,1,29,4,1],
+["coffee-hot","Drinks","Coffee with Creamer","hot · regular",50,0,7,2,1],
+["baja-freeze","Drinks","Mtn Dew® Baja Blast Freeze™","regular",260,0,69,0,1],
 ["oj","Drinks","Orange Juice","",140,2,33,0,0],
 ["water","Drinks","Water","",0,0,0,0,0],
-["ref-strawpass","Drinks","Strawberry Passionfruit Agua Refresca","large",180,0,46,0,1],
-["ref-mango","Drinks","Mango Peach Agua Refresca","large",180,0,46,0,1],
-["ref-dragon","Drinks","Dragonfruit Berry Agua Refresca","large",180,0,45,0,1],
-["ref-rock-punch","Drinks","Tropical Punch Rockstar Energy Refresca","large",210,0,52,0,1],
-["ref-rock-pine","Drinks","Pineapple Lime Rockstar Energy Refresca","large",210,0,52,0,1],
-["f-brisk","Fountain","Brisk® Mango Iced Tea","large",220,0,58,0,1],
-["f-diet-pepsi","Fountain","Diet Pepsi®","large",0,0,0,0,0],
-["f-drpepper","Fountain","Dr Pepper®","large",380,0,96,0,0],
-["f-g2","Fountain","G2 - Fruit Punch","large",160,0,42,0,1],
-["f-lipton-unsweet","Fountain","Lipton Unsweetened Iced Tea","large",0,0,0,0,0],
-["f-lipton-sweet","Fountain","Lipton Sweet Tea","large",240,0,63,0,1],
-["f-midnight","Fountain","Midnight Mtn Dew® Baja Blast™","large",420,0,108,0,1],
-["f-wild-straw","Fountain","Wild Strawberry Freeze","large",330,0,88,0,1],
-["f-dew","Fountain","Mtn Dew®","large",400,0,108,0,0],
-["f-baja-zero","Fountain","Mtn Dew® Baja Blast Zero Sugar","large",0,0,0,0,0],
-["f-baja","Fountain","Mtn Dew® Baja Blast™","large",420,0,110,0,0],
-["f-dew-zero","Fountain","Mtn Dew® Zero Sugar","large",10,0,1,0,0],
-["f-mug","Fountain","Mug® Root Beer","large",400,0,106,0,0],
-["f-pepsi","Fountain","Pepsi®","large",380,0,104,0,0],
-["f-pepsi-zero","Fountain","Pepsi® Zero Sugar","large",0,0,0,0,0],
-["f-starry","Fountain","Starry®","large",380,0,100,0,0],
-["f-trop-lemonade","Fountain","Tropicana Original Lemonade","large",400,0,102,0,1],
+["ref-dragon","Drinks","Dragonfruit Berry Agua Refresca","regular",100,0,24,0,1],
+["ref-rock-punch","Drinks","Tropical Punch Rockstar Energy Refresca","regular",110,0,28,0,1],
+["f-brisk","Fountain","Brisk® Mango Iced Tea","small",120,0,31,0,1],
+["f-diet-pepsi","Fountain","Diet Pepsi®","small",0,0,0,0,0],
+["f-drpepper","Fountain","Dr Pepper®","small",200,0,51,0,1],
+["f-g2","Fountain","G2 - Fruit Punch","small",90,0,22,0,1],
+["f-lipton-unsweet","Fountain","Lipton Unsweetened Iced Tea","small",0,0,0,0,0],
+["f-baja-zero","Fountain","Mtn Dew® Baja Blast Zero Sugar","small",0,0,0,0,0],
+["f-dew-zero","Fountain","Mtn Dew® Zero Sugar","small",5,0,1,0,1],
+["f-mug","Fountain","Mug® Root Beer","small",210,0,57,0,1],
+["f-starry","Fountain","Starry®","small",200,0,53,0,1],
+["f-trop-lemonade","Fountain","Tropicana Original Lemonade","small",210,0,54,0,1],
 ["lx-stacker","Luxe Value","Avocado Ranch Chicken Stacker","",350,16,33,17,0],
 ["lx-griller","Luxe Value","Beefy Potato Loaded Griller","",480,13,51,25,0],
-["lx-dip","Luxe Value","Chips and Nacho Supreme Dip","",400,8,38,24,1],
 ["lx-salad","Luxe Value","Mini Taco Salad","",280,11,26,15,0],
 ["n-chips-cheese","Nachos","Chips and Nacho Cheese Sauce","",220,3,24,13,0],
-["n-chips-guac","Nachos","Chips and Guacamole","",240,3,25,15,1],
 ["n-bellgrande","Nachos","Nachos BellGrande® - Beef","",730,16,82,38,0],
 ["cc-burr-ranch","New","Crispy Chicken Burrito - Avocado Ranch","",500,23,58,20,1],
-["cc-bacon-melt","New","Crispy Chicken Chipotle Bacon Melt Burrito","",700,31,60,37,1],
-["cc-strips","New","Crispy Chicken Strips","4 pc",470,29,39,22,0],
+["cc-strips","New","Crispy Chicken Strips","2 pc",240,15,20,11,1],
 ["cc-taco-ranch","New","Crispy Chicken Taco - Avocado Ranch","",260,12,21,14,1],
 ["pj-fresca","New","Fresca Pepper Jack Steak Burrito","",450,22,48,18,1],
-["pj-melty","New","Melty Pepper Jack Steak Burrito","",620,26,58,32,1],
 ["pj-fries","New","Pepper Jack Steak Nacho Fries","",650,17,60,38,1],
-["pineapple-freeze","New","Pineapple Freeze™","large",320,0,84,0,1],
 ["q-cheese","Quesadillas","Quesadilla - Cheese","",450,17,37,26,0],
-["q-chicken","Quesadillas","Quesadilla - Chicken","",510,26,38,27,0],
-["q-steak","Quesadillas","Quesadilla - Steak","",500,24,37,26,0],
 ["s-black-beans","Sides & Sweets","Black Beans","",50,2,8,1,0],
-["s-bb-rice","Sides & Sweets","Black Beans & Rice","",170,4,28,4,0],
 ["s-fiesta-pot","Sides & Sweets","Cheesy Fiesta Potatoes","",240,4,28,12,0],
-["s-cinnabon","Sides & Sweets","Cinnabon® Delights™","12 pk",930,9,93,57,0],
+["s-cinnabon","Sides & Sweets","Cinnabon® Delights™","2 pk",160,2,16,10,0],
 ["s-twists","Sides & Sweets","Cinnamon Twists","",170,1,27,6,0],
-["s-nacho-fries","Sides & Sweets","Nacho Fries","large",490,6,50,28,1],
+["s-nacho-fries","Sides & Sweets","Nacho Fries","regular",320,4,35,18,1],
 ["s-pintos","Sides & Sweets","Pintos N Cheese","",180,9,19,7,0],
 ["sp-flatbread","Specialties","3-Cheese Chicken Flatbread Melt","",390,21,30,20,0],
 ["sp-bb-cws","Specialties","Black Bean Crunchwrap Supreme®","",510,13,77,16,0],
 ["sp-rollup","Specialties","Cheesy Roll Up","",180,9,15,9,0],
-["sp-cws","Specialties","Crunchwrap Supreme®","",530,16,71,21,0],
-["sp-mex-pizza","Specialties","Mexican Pizza","",550,20,47,31,0],
 ["sp-veg-pizza","Specialties","Veggie Mexican Pizza","",460,14,46,25,1],
 ["sp-enchirito","Specialties","Enchirito","",360,18,33,17,0],
 ["t-bb-chalupa","Tacos","Black Bean Chalupa Supreme®","",340,9,36,18,1],
-["t-chalupa-beef","Tacos","Chalupa Supreme® - Beef","",360,13,31,20,0],
 ["t-cgc","Tacos","Cheesy Gordita Crunch","",500,20,41,28,0],
 ["t-crunchy","Tacos","Crunchy Taco","",170,8,13,9,0],
-["t-crunchy-sup","Tacos","Crunchy Taco Supreme®","",190,8,15,11,0],
-["t-dcgc","Tacos","Doritos® Cheesy Gordita Crunch - Nacho Cheese","",510,20,42,29,1],
 ["t-dlt","Tacos","Nacho Cheese Doritos® Locos Taco","",170,8,13,9,0],
-["t-dlt-sup","Tacos","Nacho Cheese Doritos® Locos Taco Supreme®","",190,8,15,11,0],
 ["t-soft-beef","Tacos","Soft Taco - Beef","",180,9,18,8,0],
-["t-soft-sup","Tacos","Soft Taco Supreme® - Beef","",210,10,20,10,0],
 ["t-spicy-potato","Tacos","Spicy Potato Soft Taco","",240,6,29,12,0],
 ["veggie-bowl","Veggie Cravings","Veggie Bowl","",470,13,58,21,1]
 ];
@@ -179,16 +141,16 @@ var STOPS = [
 var COORDS = [[41.14438,-95.91225],[41.1593,-95.93593],[41.14064,-95.97509],[41.1379,-96.02824],[41.17944,-96.04324],[41.20442,-96.08176],[41.20466,-96.12773],[41.14463,-96.16281],[41.19135,-96.19969],[41.19262,-96.2353],[41.26799,-96.23492],[41.23352,-96.20255],[41.23444,-96.14239],[41.23394,-96.1017],[41.23296,-96.04367],[41.2593,-96.02192],[41.21106,-96.02444],[41.2127,-95.9862],[41.22099,-95.97537],[41.22887,-95.84966],[41.24168,-95.82626],[41.26483,-95.8415],[41.26165,-95.88856],[41.25933,-95.97077],[41.32834,-95.95829],[41.31453,-96.02446],[41.30539,-96.05202],[41.288,-96.08072],[41.29274,-96.14228],[41.2915,-96.18284]];
 
 /* planned order per stop: breakfast + coffee/OJ at stops 1-4 (gone by 11 AM),
-   caffeinated drinks all placed by stop 18 (Rockstar energy at stops 5-6),
-   the rest calorie-balanced (~1,080-1,280 cal/stop), max 2 drinks per stop */
-var PLAN = [["bk-cw-sausage","bk-q-steak","bk-salsa","ctb-bacon","cin-coffee-hot"],["bk-cw-bacon","ctb-sausage","gtb-bacon","hash-brown","coffee-iced"],["bk-cal-cw-bacon","bk-q-sausage","ctb-potato","cin-coffee-iced","coffee-hot"],["bk-q-bacon","gtb-sausage","gtb-steak","oj"],["ds-baja-zero","ref-rock-punch","pineapple-freeze","t-cgc"],["bean-burrito","ref-rock-pine","f-dew-zero","t-dcgc"],["cc-soft","ds-baja-freeze","f-g2","pj-fresca"],["av-verde","ds-baja","sp-veg-pizza","t-soft-sup"],["cdb","jal-citrus","ds-midnight","n-chips-cheese"],["ds-pepsi","s-fiesta-pot","veggie-bowl"],["f-midnight","lx-griller","t-spicy-potato"],["f-baja","cc-strips","cc-taco-ranch"],["water","f-dew","n-chips-guac","s-nacho-fries"],["cc-bowl","cc-crispy","f-drpepper","f-pepsi-zero"],["cc-burrito","f-wild-straw","f-pepsi"],["b5l","baja-freeze","f-baja-zero","lx-salad"],["f-lipton-unsweet","f-lipton-sweet","q-steak","t-bb-chalupa"],["f-brisk","f-diet-pepsi","cc-burr-ranch","t-chalupa-beef"],["s-black-beans","s-cinnabon","t-crunchy-sup"],["lx-stacker","n-bellgrande","s-twists"],["gcb","s-bb-rice","sp-enchirito"],["f-starry","cc-bacon-melt","t-crunchy"],["bb-gcb","sp-flatbread","t-dlt"],["bs-beef","pj-fries","t-soft-beef"],["lx-dip","pj-melty","sp-rollup"],["cc-rolled-q","f-trop-lemonade","s-pintos"],["ref-mango","f-mug","sp-mex-pizza"],["ds-lemonade","sp-cws","t-dlt-sup"],["ref-dragon","q-cheese","q-chicken"],["cbr","ref-strawpass","sp-bb-cws"]];
+   caffeinated drinks all placed by stop 18 (Rockstar energy at stop 5),
+   the rest calorie-balanced (~490-730 cal/stop), max 2 drinks per stop */
+var PLAN = [["bk-cal-cw-bacon"],["gtb-bacon","coffee-hot","bk-salsa"],["bk-q-bacon","oj"],["ctb-bacon","hash-brown","cin-coffee-hot"],["ref-rock-punch","bean-burrito","s-pintos"],["n-bellgrande"],["f-baja-zero","sp-veg-pizza","sp-rollup"],["bb-gcb"],["pj-fries"],["f-lipton-unsweet","cdb","t-spicy-potato"],["ds-baja-zero","bs-beef","cc-strips"],["f-brisk","lx-stacker","t-crunchy"],["baja-freeze","cc-taco-ranch"],["cc-rolled-q"],["f-trop-lemonade","lx-salad"],["f-diet-pepsi","pj-fresca","n-chips-cheese"],["f-drpepper","t-bb-chalupa"],["f-dew-zero","cbr","s-fiesta-pot"],["f-mug","cc-crispy","t-dlt"],["f-starry","s-nacho-fries"],["sp-bb-cws"],["cc-burr-ranch"],["t-cgc"],["b5l","av-verde"],["f-g2","sp-flatbread","s-black-beans"],["cc-burrito","jal-citrus"],["lx-griller","s-cinnabon"],["water","q-cheese","cc-soft"],["veggie-bowl","s-twists"],["ref-dragon","sp-enchirito","t-soft-beef"]];
 var PLAN_STOP = {};
 PLAN.forEach(function (ids, i) { ids.forEach(function (id) { PLAN_STOP[id] = i; }); });
 
 /* planned rider per item: one item per rider per stop, balanced on food AND
-   drink calories (food 5,705-5,730 · drink 1,730-1,780 · total 7,450-7,510),
-   21-22 items, 3-4 breakfast-stop items, 4-5 caffeinated drinks each */
-var PLAN_RIDER = {"bk-cw-sausage":2,"bk-q-steak":4,"bk-salsa":0,"ctb-bacon":1,"cin-coffee-hot":3,"bk-cw-bacon":1,"ctb-sausage":2,"gtb-bacon":3,"hash-brown":4,"coffee-iced":0,"bk-cal-cw-bacon":3,"bk-q-sausage":2,"ctb-potato":4,"cin-coffee-iced":0,"coffee-hot":1,"bk-q-bacon":3,"gtb-sausage":1,"gtb-steak":0,"oj":4,"ds-baja-zero":2,"ref-rock-punch":1,"pineapple-freeze":3,"t-cgc":4,"bean-burrito":1,"ref-rock-pine":4,"f-dew-zero":3,"t-dcgc":0,"cc-soft":0,"ds-baja-freeze":4,"f-g2":2,"pj-fresca":3,"av-verde":4,"ds-baja":1,"sp-veg-pizza":0,"t-soft-sup":2,"cdb":4,"jal-citrus":1,"ds-midnight":0,"n-chips-cheese":3,"ds-pepsi":2,"s-fiesta-pot":3,"veggie-bowl":1,"f-midnight":3,"lx-griller":1,"t-spicy-potato":2,"f-baja":2,"cc-strips":3,"cc-taco-ranch":0,"water":3,"f-dew":1,"n-chips-guac":2,"s-nacho-fries":0,"cc-bowl":0,"cc-crispy":2,"f-drpepper":3,"f-pepsi-zero":4,"cc-burrito":1,"f-wild-straw":2,"f-pepsi":0,"b5l":1,"baja-freeze":4,"f-baja-zero":2,"lx-salad":0,"f-lipton-unsweet":4,"f-lipton-sweet":1,"q-steak":0,"t-bb-chalupa":2,"f-brisk":0,"f-diet-pepsi":2,"cc-burr-ranch":3,"t-chalupa-beef":4,"s-black-beans":3,"s-cinnabon":4,"t-crunchy-sup":1,"lx-stacker":4,"n-bellgrande":2,"s-twists":0,"gcb":4,"s-bb-rice":1,"sp-enchirito":3,"f-starry":2,"cc-bacon-melt":0,"t-crunchy":4,"bb-gcb":1,"sp-flatbread":2,"t-dlt":3,"bs-beef":0,"pj-fries":2,"t-soft-beef":1,"lx-dip":3,"pj-melty":1,"sp-rollup":4,"cc-rolled-q":4,"f-trop-lemonade":3,"s-pintos":0,"ref-mango":1,"f-mug":0,"sp-mex-pizza":3,"ds-lemonade":4,"sp-cws":2,"t-dlt-sup":3,"ref-dragon":1,"q-cheese":4,"q-chicken":2,"cbr":3,"ref-strawpass":4,"sp-bb-cws":0};
+   drink calories (food 3,140-3,395 · drink 340-420 · total 3,510-3,735),
+   13 items each, 1-2 breakfast-stop items, 2-3 caffeinated drinks each */
+var PLAN_RIDER = {"bk-cal-cw-bacon":3,"gtb-bacon":4,"coffee-hot":2,"bk-salsa":0,"bk-q-bacon":2,"oj":0,"ctb-bacon":1,"hash-brown":0,"cin-coffee-hot":4,"ref-rock-punch":3,"bean-burrito":0,"s-pintos":1,"n-bellgrande":1,"f-baja-zero":1,"sp-veg-pizza":2,"sp-rollup":0,"bb-gcb":4,"pj-fries":3,"f-lipton-unsweet":1,"cdb":0,"t-spicy-potato":2,"ds-baja-zero":1,"bs-beef":0,"cc-strips":2,"f-brisk":2,"lx-stacker":1,"t-crunchy":4,"baja-freeze":1,"cc-taco-ranch":3,"cc-rolled-q":4,"f-trop-lemonade":3,"lx-salad":2,"f-diet-pepsi":2,"pj-fresca":0,"n-chips-cheese":3,"f-drpepper":0,"t-bb-chalupa":1,"f-dew-zero":4,"cbr":2,"s-fiesta-pot":3,"f-mug":4,"cc-crispy":1,"t-dlt":3,"f-starry":2,"s-nacho-fries":4,"sp-bb-cws":0,"cc-burr-ranch":2,"t-cgc":3,"b5l":1,"av-verde":4,"f-g2":1,"sp-flatbread":4,"s-black-beans":0,"cc-burrito":0,"jal-citrus":2,"lx-griller":2,"s-cinnabon":3,"water":3,"q-cheese":1,"cc-soft":4,"veggie-bowl":3,"s-twists":4,"ref-dragon":3,"sp-enchirito":0,"t-soft-beef":4};
 
 var JERSEYS = ["#FF3D9A","#3EE8D2","#FFC53D","#8FE85C","#B08CFF"];
 var DEFAULT_NAMES = ["Wyatt","Jack","Tyler","Alex","Ryan"];
@@ -626,13 +588,13 @@ function renderRace(pct) {
     '<div class="kv"><span class="k">Fair share</span><span class="num">~' + Math.round(ITEMS.length / 5) + ' items · ~' + Math.round(calAll / 5).toLocaleString() + ' cal each</span></div>' +
     '<div class="pbar"><i style="width:' + Math.min(100, Math.round(calEaten / calAll * 100)) + '%;background:linear-gradient(90deg,var(--teal),var(--gold))"></i></div>' +
     '</div>';
-  h += '<div class="finish-note">Sunday 8/30 · 30 stages · 107 items · 5 riders · finish: 168th &amp; Maple</div>';
+  h += '<div class="finish-note">Sunday 8/30 · 30 stages · ' + ITEMS.length + ' items · 5 riders · finish: 168th &amp; Maple</div>';
   h += '<div class="resetwrap"><button class="btn danger" id="resetbtn">Reset race data</button></div>';
   return h;
 }
 
 function renderMenu() {
-  var h = '<input class="search" id="menusearch" type="search" placeholder="Search 107 items…" value="' + esc(menuSearch) + '">';
+  var h = '<input class="search" id="menusearch" type="search" placeholder="Search ' + ITEMS.length + ' items…" value="' + esc(menuSearch) + '">';
   h += '<div class="filters">' + [['all', 'All'], ['left', 'Left'], ['eaten', 'Eaten']].map(function (f) {
     return '<button class="fbtn' + (menuFilter === f[0] ? ' on' : '') + '" data-filter="' + f[0] + '">' + f[1] + '</button>';
   }).join('') + '</div>';
