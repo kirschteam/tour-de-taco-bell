@@ -102,13 +102,24 @@ var ITEMS = [
 
 var CAT_ORDER = ["Breakfast","Burritos","Cantina Chicken","Dirty Sodas","Drinks","Fountain","Luxe Value","Nachos","New","Quesadillas","Sides & Sweets","Specialties","Tacos","Veggie Cravings"];
 
-/* [address, city] in route order; last = the finish.
-   Order minimizes total drive time (OpenRouteService driving matrix + 2-opt/or-opt,
-   free start, finish fixed at 168th & Maple): ~3h43m / ~104 mi vs 4h11m / ~119 mi
-   for the old CB-first order. */
+/* [address, city, type?] in route order; type "chg" = Tesla Supercharger; last = the finish.
+   Order minimizes total elapsed time (OSRM driving matrix + 2-opt/or-opt with Sunday
+   opening-hour time windows): start = leave home 8:00 AM, pick up riders at 43rd & Dodge
+   ~8:17, finish fixed at 168th & Maple, arrive ~4:57 PM. Zero waiting at any window
+   (5310 S 108th opens 10 AM Sun, 4810 S 72nd & 3150 Dial Dr open 9 AM Sun). Two
+   Supercharger stops ride along: CB Metro Crossing ~9:43 AM, 90th & Center ~2:41 PM. */
 var STOPS = [
-["1506 Galvin Rd S","Bellevue"],
+["3855 Dodge St","Omaha (Midtown)"],
+["7516 N 30th St","Omaha (Florence)"],
+["2759 W Broadway","Council Bluffs, IA"],
+["318 E Broadway","Council Bluffs, IA"],
+["1114 Woodbury Ave","Council Bluffs, IA"],
+["3815 Metro Dr","Council Bluffs, IA · Supercharger","chg"],
+["3150 Dial Dr","Council Bluffs, IA"],
+["3917 S 42nd St","Omaha (South)"],
+["4801 L St","Omaha (South)"],
 ["10110 S 15th St","Bellevue"],
+["1506 Galvin Rd S","Bellevue"],
 ["4105 Twin Creek Dr","Bellevue"],
 ["7710 Olson Dr","Papillion"],
 ["8013 S 84th St","La Vista"],
@@ -121,17 +132,10 @@ var STOPS = [
 ["18370 Wright St","Omaha (West)"],
 ["14554 W Center Rd","Omaha"],
 ["12075 W Center Rd","Omaha"],
+["8809 W Center Rd","Omaha · Supercharger","chg"],
 ["2812 S 84th St","Omaha"],
-["7051 Dodge St","Omaha (Midtown)"],
 ["4810 S 72nd St","Omaha (Ralston)"],
-["4801 L St","Omaha (South)"],
-["3917 S 42nd St","Omaha (South)"],
-["3150 Dial Dr","Council Bluffs, IA"],
-["1114 Woodbury Ave","Council Bluffs, IA"],
-["318 E Broadway","Council Bluffs, IA"],
-["2759 W Broadway","Council Bluffs, IA"],
-["3855 Dodge St","Omaha (Midtown)"],
-["7516 N 30th St","Omaha (Florence)"],
+["7051 Dodge St","Omaha (Midtown)"],
 ["6110 N 72nd St","Omaha"],
 ["5139 N 90th St","Omaha"],
 ["3211 N 108th St","Omaha"],
@@ -140,12 +144,13 @@ var STOPS = [
 ];
 
 /* [lat, lng] per stop, same order as STOPS (geocoded via OSM Nominatim) */
-var COORDS = [[41.14438,-95.91225],[41.1593,-95.93593],[41.14064,-95.97509],[41.1379,-96.02824],[41.17944,-96.04324],[41.20442,-96.08176],[41.20466,-96.12773],[41.14463,-96.16281],[41.19135,-96.19969],[41.19262,-96.2353],[41.26799,-96.23492],[41.23352,-96.20255],[41.23444,-96.14239],[41.23394,-96.1017],[41.23296,-96.04367],[41.2593,-96.02192],[41.21106,-96.02444],[41.2127,-95.9862],[41.22099,-95.97537],[41.22887,-95.84966],[41.24168,-95.82626],[41.26483,-95.8415],[41.26165,-95.88856],[41.25933,-95.97077],[41.32834,-95.95829],[41.31453,-96.02446],[41.30539,-96.05202],[41.288,-96.08072],[41.29274,-96.14228],[41.2915,-96.18284]];
+var COORDS = [[41.25933,-95.97077],[41.32834,-95.95829],[41.26165,-95.88856],[41.26483,-95.8415],[41.24168,-95.82626],[41.22089,-95.83615],[41.22887,-95.84966],[41.22099,-95.97537],[41.2127,-95.9862],[41.1593,-95.93593],[41.14438,-95.91225],[41.14064,-95.97509],[41.1379,-96.02824],[41.17944,-96.04324],[41.20442,-96.08176],[41.20466,-96.12773],[41.14463,-96.16281],[41.19135,-96.19969],[41.19262,-96.2353],[41.26799,-96.23492],[41.23352,-96.20255],[41.23444,-96.14239],[41.23394,-96.1017],[41.23284,-96.0515],[41.23296,-96.04367],[41.21106,-96.02444],[41.2593,-96.02192],[41.31453,-96.02446],[41.30539,-96.05202],[41.288,-96.08072],[41.29274,-96.14228],[41.2915,-96.18284]];
 
 /* planned order per stop: breakfast + coffee/OJ at stops 1-4 (gone by 11 AM),
-   caffeinated drinks all placed by stop 18 (Rockstar energy at stop 5),
-   the rest calorie-balanced (~570-750 cal/stop), max 2 drinks per stop */
-var PLAN = [["bk-cw-sausage"],["gtb-sausage","coffee-hot","bk-salsa"],["bk-q-sausage","oj"],["ctb-sausage","cin-coffee-hot","hash-brown"],["ref-rock-punch","lx-griller"],["f-baja","s-nacho-fries","t-soft-beef"],["f-lipton-sweet","cbr","s-twists"],["f-brisk","cdb","jal-citrus"],["f-drpepper","bs-beef"],["ds-baja","lx-salad","sp-rollup"],["f-pepsi","sp-flatbread"],["f-trop-lemonade","t-chalupa-beef"],["n-bellgrande"],["f-dew","bean-burrito","t-crunchy"],["baja-freeze","cc-crispy","cc-soft"],["gcb"],["pj-fries"],["pj-melty"],["cc-rolled-q","av-verde"],["sp-mex-pizza","s-bb-rice"],["ref-strawpass","cc-burrito"],["sp-cws","s-pintos"],["f-mug","lx-stacker","t-dlt"],["q-chicken","t-spicy-potato"],["t-dcgc","n-chips-cheese"],["cc-burr-ranch","cc-strips"],["water","b5l","cc-taco-ranch"],["f-g2","cc-bowl"],["f-starry","sp-enchirito","s-cinnabon"],["t-cgc","s-fiesta-pot"]];
+   caffeinated drinks all placed by stage 19 (Rockstar energy at stage 5),
+   the rest calorie-balanced (~570-750 cal/stop), max 2 drinks per stop.
+   Charger stages (6 and 24) order nothing. */
+var PLAN = [["bk-cw-sausage"],["gtb-sausage","coffee-hot","bk-salsa"],["bk-q-sausage","oj"],["ctb-sausage","cin-coffee-hot","hash-brown"],["ref-rock-punch","lx-griller"],[],["f-baja","s-nacho-fries","t-soft-beef"],["f-lipton-sweet","cbr","s-twists"],["f-brisk","cdb","jal-citrus"],["f-drpepper","bs-beef"],["ds-baja","lx-salad","sp-rollup"],["f-pepsi","sp-flatbread"],["f-trop-lemonade","t-chalupa-beef"],["n-bellgrande"],["f-dew","bean-burrito","t-crunchy"],["baja-freeze","cc-crispy","cc-soft"],["gcb"],["pj-fries"],["pj-melty"],["cc-rolled-q","av-verde"],["sp-mex-pizza","s-bb-rice"],["ref-strawpass","cc-burrito"],["sp-cws","s-pintos"],[],["f-mug","lx-stacker","t-dlt"],["q-chicken","t-spicy-potato"],["t-dcgc","n-chips-cheese"],["cc-burr-ranch","cc-strips"],["water","b5l","cc-taco-ranch"],["f-g2","cc-bowl"],["f-starry","sp-enchirito","s-cinnabon"],["t-cgc","s-fiesta-pot"]];
 var PLAN_STOP = {};
 PLAN.forEach(function (ids, i) { ids.forEach(function (id) { PLAN_STOP[id] = i; }); });
 
@@ -363,7 +368,8 @@ function isRaceMorning() {
   var iso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   return iso <= RACE_DAY && d.getHours() < BK_CUTOFF_H;
 }
-function mapsUrl(i) { return 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent('Taco Bell, ' + STOPS[i][0] + ', ' + STOPS[i][1].replace(/\s*\(.*\)/, '').replace(/·.*/, '')); }
+function isCharger(i) { return STOPS[i] && STOPS[i][2] === 'chg'; }
+function mapsUrl(i) { return 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent((isCharger(i) ? 'Tesla Supercharger, ' : 'Taco Bell, ') + STOPS[i][0] + ', ' + STOPS[i][1].replace(/\s*\(.*\)/, '').replace(/·.*/, '')); }
 function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
 /* ---------------- styles ---------------- */
@@ -557,8 +563,8 @@ function renderRace(pct) {
 
   if (ns >= 0) {
     var isFinish = ns === STOPS.length - 1;
-    h += '<div class="card"><h2>' + (isFinish ? 'Final stage' : 'Next stop') + '</h2><div class="nextstop">' +
-      '<div class="stage-badge' + (isFinish ? ' finish' : '') + '"><span class="sn disp num">' + (ns + 1) + '</span><span class="sk">stage</span></div>' +
+    h += '<div class="card"><h2>' + (isFinish ? 'Final stage' : isCharger(ns) ? 'Charge stop' : 'Next stop') + '</h2><div class="nextstop">' +
+      '<div class="stage-badge' + (isFinish ? ' finish' : '') + '"><span class="sn disp num">' + (isCharger(ns) ? '⚡' : (ns + 1)) + '</span><span class="sk">' + (isCharger(ns) ? 'charge' : 'stage') + '</span></div>' +
       '<div><div class="addr">' + esc(STOPS[ns][0]) + '</div><div class="city">' + esc(STOPS[ns][1]) + '</div></div>' +
       '<a class="navbtn" target="_blank" rel="noopener" href="' + mapsUrl(ns) + '">Navigate</a>' +
       '</div>' +
@@ -590,7 +596,7 @@ function renderRace(pct) {
     '<div class="kv"><span class="k">Fair share</span><span class="num">~' + Math.round(ITEMS.length / 5) + ' items · ~' + Math.round(calAll / 5).toLocaleString() + ' cal each</span></div>' +
     '<div class="pbar"><i style="width:' + Math.min(100, Math.round(calEaten / calAll * 100)) + '%;background:linear-gradient(90deg,var(--teal),var(--gold))"></i></div>' +
     '</div>';
-  h += '<div class="finish-note">Sunday 8/30 · 30 stages · ' + ITEMS.length + ' items · 5 riders · finish: 168th &amp; Maple</div>';
+  h += '<div class="finish-note">Sunday 8/30 · 30 Taco Bells + 2 charge stops · ' + ITEMS.length + ' items · 5 riders · finish: 168th &amp; Maple</div>';
   h += '<div class="resetwrap"><button class="btn danger" id="resetbtn">Reset race data</button></div>';
   return h;
 }
@@ -636,7 +642,9 @@ function renderRoute() {
     var st = state.stops[i];
     var cls = st && st.s === 'done' ? ' done' : st && st.s === 'skip' ? ' skip' : (i === ns ? ' next' : '');
     var got = itemsAtStop(i).length, pln = (PLAN[i] || []).length;
-    h += '<div class="dot num' + cls + '">' + (i + 1) + '<span class="dc">' + (got > 0 ? got + '/' + pln : '~' + pln) + '</span></div>';
+    h += isCharger(i)
+      ? '<div class="dot num' + cls + '">⚡<span class="dc">chg</span></div>'
+      : '<div class="dot num' + cls + '">' + (i + 1) + '<span class="dc">' + (got > 0 ? got + '/' + pln : '~' + pln) + '</span></div>';
   }
   h += '</div></div>';
   for (var j = 0; j < STOPS.length; j++) {
@@ -649,13 +657,13 @@ function renderRoute() {
       orderHtml = '<div class="stopitems" data-editorder="' + j + '">' + oi.map(function (o) {
         return esc(o.it[2]) + ' <b>' + esc((state.names[o.e.p] || '?').charAt(0)) + '</b>';
       }).join(' · ') + '</div>';
-    } else if (status === 'done') {
+    } else if (status === 'done' && !isCharger(j)) {
       orderHtml = '<div class="stopitems" data-editorder="' + j + '">+ add what was ordered</div>';
     } else if (status !== 'skip' && (PLAN[j] || []).length) {
       orderHtml = '<div class="stopitems plan" data-editorder="' + j + '"><em>plan · ~' + planCal(j).toLocaleString() + ' cal:</em> ' + PLAN[j].map(planItemLabel).join(' · ') + '</div>';
     }
     h += '<div class="stoprow' + (status === 'done' ? ' done' : status === 'skip' ? ' skip' : '') + '">' +
-      '<div class="stage-badge' + (isFinish ? ' finish' : '') + '" style="width:44px;height:44px"><span class="sn disp num" style="font-size:16px">' + (j + 1) + '</span><span class="sk">' + (isFinish ? 'finish' : 'stage') + '</span></div>' +
+      '<div class="stage-badge' + (isFinish ? ' finish' : '') + '" style="width:44px;height:44px"><span class="sn disp num" style="font-size:16px">' + (isCharger(j) ? '⚡' : (j + 1)) + '</span><span class="sk">' + (isFinish ? 'finish' : isCharger(j) ? 'charge' : 'stage') + '</span></div>' +
       '<div class="info"><div class="a">' + esc(STOPS[j][0]) + '</div><div class="c">' + esc(STOPS[j][1]) + '</div>' +
       (s2 && s2.t ? '<div class="t num">' + (status === 'done' ? '✓ ' + fmtClock(s2.t) : 'skipped') + '</div>' : '<a class="maplink" target="_blank" rel="noopener" href="' + mapsUrl(j) + '">Open in Maps →</a>') +
       orderHtml +
@@ -787,11 +795,13 @@ var map = null, mapMarkers = [], leafletLoading = false;
 function mapIcon(i) {
   var st = state.stops[i], ns = nextStopIdx();
   var cls = st && st.s === 'done' ? ' done' : st && st.s === 'skip' ? ' skip' : i === ns ? ' next' : '';
-  return L.divIcon({ className: '', html: '<div class="mdot' + cls + '">' + (i + 1) + '</div>', iconSize: [26, 26], iconAnchor: [13, 13] });
+  return L.divIcon({ className: '', html: '<div class="mdot' + cls + '">' + (isCharger(i) ? '⚡' : (i + 1)) + '</div>', iconSize: [26, 26], iconAnchor: [13, 13] });
 }
 function popupHtml(i) {
   var oi = itemsAtStop(i);
-  var lines = oi.length
+  var lines = isCharger(i)
+    ? 'Supercharge ~25 min'
+    : oi.length
     ? oi.map(function (o) { return esc(o.it[2]) + ' (' + esc((state.names[o.e.p] || '?').charAt(0)) + ')'; }).join('<br>')
     : 'Plan · ~' + planCal(i).toLocaleString() + ' cal:<br>' + (PLAN[i] || []).map(function (id) { var it = itemById(id); var p = PLAN_RIDER[id]; return it ? esc(it[2]) + (p != null ? ' (' + pInit(p) + ')' : '') : ''; }).join('<br>');
   return '<div class="pa">' + (i + 1) + ' · ' + esc(STOPS[i][0]) + '</div>' +
