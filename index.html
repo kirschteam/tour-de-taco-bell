@@ -25,79 +25,84 @@ var DB_URL = 'https://tour-de-taco-bell-default-rtdb.firebaseio.com/';
 var DB_PATH = '/tour-de-taco-bell-2026';
 
 /* ---------------- static data ---------------- */
-/* [id, category, name, sizeNote, cal, protein, carbs, fat, est]
+/* [id, category, name, sizeNote, cal, protein, carbs, fat, est, price]
    Slimmed-down menu: variant duplicates (protein/flavor/supreme/zero-sugar versions
    of the same item) collapsed to the CLASSIC member of each family, and every
-   multi-size item at its SMALLEST size (16 oz fountain, regular freeze/refresca/
-   fries/coffee, 2 pc strips, 2 pk Cinnabon). Scaled values flagged est.
-   Full 107-item menu: items.json / git history. */
+   multi-size item at its SMALLEST size (16 oz fountain, regular freeze/
+   fries/coffee, 2 pk Cinnabon). Scaled/estimated values flagged est.
+   Refreshed 2026-08-29 against the tacobell.com menu API for Omaha store
+   035284: 7 discontinued items out (Crispy Chicken AR line, PJ Steak Nacho
+   Fries, Jalapeno Citrus packet, Enchirito, Rockstar Refresca), 7 in
+   (Tajin Taco + CGC, Decades menu x4, Pineapple Citrus Energy). Prices and
+   calories are that store's menu; other stores may differ slightly.
+   Original 107-item pull: items.json / git history. */
 var ITEMS = [
-["bk-cw-sausage","Breakfast","Breakfast Crunchwrap - Sausage Patty","",720,21,50,47,0],
-["bk-q-sausage","Breakfast","Breakfast Quesadilla - Sausage","",560,19,38,36,0],
-["bk-salsa","Breakfast","Breakfast Salsa Packet","",5,0,1,0,0],
-["ctb-sausage","Breakfast","Cheesy Toasted Breakfast Burrito - Sausage","",350,12,34,19,0],
-["gtb-sausage","Breakfast","Grande Toasted Breakfast Burrito - Sausage","",570,20,51,32,0],
-["hash-brown","Breakfast","Hash Brown","",160,1,15,11,0],
-["bean-burrito","Burritos","Bean Burrito","",350,13,54,9,0],
-["b5l","Burritos","Beefy 5-Layer Burrito","",490,18,63,18,0],
-["bs-beef","Burritos","Burrito Supreme® - Beef","",390,16,51,14,0],
-["cbr","Burritos","Cheesy Bean & Rice Burrito","",420,9,55,18,0],
-["cdb","Burritos","Cheesy Double Beef Burrito","",450,17,52,20,0],
-["gcb","Burritos","Grilled Cheese Burrito","",710,27,79,32,0],
-["av-verde","Cantina Chicken","Avocado Salsa Verde Packet","",25,0,1,2,1],
-["cc-bowl","Cantina Chicken","Cantina Chicken Bowl","",490,27,41,25,0],
-["cc-burrito","Cantina Chicken","Cantina Chicken Burrito","",490,24,50,22,0],
-["cc-crispy","Cantina Chicken","Cantina Chicken Crispy Taco","",260,12,18,15,0],
-["cc-rolled-q","Cantina Chicken","Cantina Chicken Rolled Quesadilla","",570,28,48,30,0],
-["cc-soft","Cantina Chicken","Cantina Chicken Soft Taco","",190,12,17,8,0],
-["jal-citrus","Cantina Chicken","Jalapeno Citrus Salsa Packet","",10,0,2,0,1],
-["ds-baja","Dirty Sodas","Mtn Dew® Baja Blast™ Dirty Soda","small",250,0,59,1,1],
-["cin-coffee-hot","Drinks","Cinnabon® Delights™ Coffee","hot · regular",160,1,29,4,1],
-["coffee-hot","Drinks","Coffee with Creamer","hot · regular",50,0,7,2,1],
-["baja-freeze","Drinks","Mtn Dew® Baja Blast Freeze™","regular",260,0,69,0,1],
-["oj","Drinks","Orange Juice","",140,2,33,0,0],
-["water","Drinks","Water","",0,0,0,0,0],
-["ref-strawpass","Drinks","Strawberry Passionfruit Agua Refresca","regular",100,0,25,0,1],
-["ref-rock-punch","Drinks","Tropical Punch Rockstar Energy Refresca","regular",110,0,28,0,1],
-["f-brisk","Fountain","Brisk® Mango Iced Tea","small",120,0,31,0,1],
-["f-drpepper","Fountain","Dr Pepper®","small",200,0,51,0,1],
-["f-g2","Fountain","G2 - Fruit Punch","small",90,0,22,0,1],
-["f-lipton-sweet","Fountain","Lipton Sweet Tea","small",130,0,34,0,1],
-["f-dew","Fountain","Mtn Dew®","small",210,0,58,0,1],
-["f-baja","Fountain","Mtn Dew® Baja Blast™","small",220,0,59,0,1],
-["f-mug","Fountain","Mug® Root Beer","small",210,0,57,0,1],
-["f-pepsi","Fountain","Pepsi®","small",200,0,55,0,1],
-["f-starry","Fountain","Starry®","small",200,0,53,0,1],
-["f-trop-lemonade","Fountain","Tropicana Original Lemonade","small",210,0,54,0,1],
-["lx-stacker","Luxe Value","Avocado Ranch Chicken Stacker","",350,16,33,17,0],
-["lx-griller","Luxe Value","Beefy Potato Loaded Griller","",480,13,51,25,0],
-["lx-salad","Luxe Value","Mini Taco Salad","",280,11,26,15,0],
-["n-chips-cheese","Nachos","Chips and Nacho Cheese Sauce","",220,3,24,13,0],
-["n-bellgrande","Nachos","Nachos BellGrande® - Beef","",730,16,82,38,0],
-["cc-burr-ranch","New","Crispy Chicken Burrito - Avocado Ranch","",500,23,58,20,1],
-["cc-strips","New","Crispy Chicken Strips","2 pc",240,15,20,11,1],
-["cc-taco-ranch","New","Crispy Chicken Taco - Avocado Ranch","",260,12,21,14,1],
-["pj-melty","New","Melty Pepper Jack Steak Burrito","",620,26,58,32,1],
-["pj-fries","New","Pepper Jack Steak Nacho Fries","",650,17,60,38,1],
-["q-chicken","Quesadillas","Quesadilla - Chicken","",510,26,38,27,0],
-["s-bb-rice","Sides & Sweets","Black Beans & Rice","",170,4,28,4,0],
-["s-fiesta-pot","Sides & Sweets","Cheesy Fiesta Potatoes","",240,4,28,12,0],
-["s-cinnabon","Sides & Sweets","Cinnabon® Delights™","2 pk",160,2,16,10,0],
-["s-twists","Sides & Sweets","Cinnamon Twists","",170,1,27,6,0],
-["s-nacho-fries","Sides & Sweets","Nacho Fries","regular",320,4,35,18,1],
-["s-pintos","Sides & Sweets","Pintos N Cheese","",180,9,19,7,0],
-["sp-flatbread","Specialties","3-Cheese Chicken Flatbread Melt","",390,21,30,20,0],
-["sp-rollup","Specialties","Cheesy Roll Up","",180,9,15,9,0],
-["sp-cws","Specialties","Crunchwrap Supreme®","",530,16,71,21,0],
-["sp-mex-pizza","Specialties","Mexican Pizza","",550,20,47,31,0],
-["sp-enchirito","Specialties","Enchirito","",360,18,33,17,0],
-["t-chalupa-beef","Tacos","Chalupa Supreme® - Beef","",360,13,31,20,0],
-["t-cgc","Tacos","Cheesy Gordita Crunch","",500,20,41,28,0],
-["t-crunchy","Tacos","Crunchy Taco","",170,8,13,9,0],
-["t-dcgc","Tacos","Doritos® Cheesy Gordita Crunch - Nacho Cheese","",510,20,42,29,1],
-["t-dlt","Tacos","Nacho Cheese Doritos® Locos Taco","",170,8,13,9,0],
-["t-soft-beef","Tacos","Soft Taco - Beef","",180,9,18,8,0],
-["t-spicy-potato","Tacos","Spicy Potato Soft Taco","",240,6,29,12,0]
+["bk-cw-sausage","Breakfast","Breakfast Crunchwrap - Sausage Patty","",740,21,50,47,0,4.19],
+["bk-q-sausage","Breakfast","Breakfast Quesadilla - Sausage","",500,17,34,32,1,3.19],
+["bk-salsa","Breakfast","Breakfast Salsa Packet","",0,0,0,0,0,0],
+["ctb-sausage","Breakfast","Cheesy Toasted Breakfast Burrito - Sausage","",350,12,34,19,0,1.69],
+["gtb-sausage","Breakfast","Grande Toasted Breakfast Burrito - Sausage","",570,20,51,32,0,2.99],
+["hash-brown","Breakfast","Hash Brown","",170,1,15,11,0,1.39],
+["bean-burrito","Burritos","Bean Burrito","",360,13,54,9,0,2.29],
+["b5l","Burritos","Beefy 5-Layer Burrito","",490,18,63,18,0,3.99],
+["bs-beef","Burritos","Burrito Supreme® - Beef","",390,16,51,14,0,5.69],
+["cbr","Burritos","Cheesy Bean & Rice Burrito","",400,9,52,17,1,1.69],
+["cdb","Burritos","Cheesy Double Beef Burrito","",560,21,65,25,1,2.99],
+["gcb","Burritos","Grilled Cheese Burrito","",690,26,77,31,1,5.69],
+["av-verde","Cantina Chicken","Avocado Verde Salsa Sauce Packet","",50,0,2,5,1,0.29],
+["cc-bowl","Cantina Chicken","Cantina Chicken Bowl","",520,29,43,27,1,8.69],
+["cc-burrito","Cantina Chicken","Cantina Chicken Burrito","",570,28,58,26,1,6.79],
+["cc-crispy","Cantina Chicken","Cantina Chicken Crispy Taco","",320,15,22,18,1,3.59],
+["cc-rolled-q","Cantina Chicken","Cantina Chicken Rolled Quesadilla","",650,32,55,34,1,6.99],
+["cc-soft","Cantina Chicken","Cantina Chicken Soft Taco","",260,16,23,11,1,3.59],
+["ds-baja","Dirty Sodas","Mtn Dew® Baja Blast™ Dirty Soda","small",250,0,59,1,1,3.29],
+["cin-coffee-hot","Drinks","Cinnabon® Delights™ Coffee","hot · regular",160,1,29,4,1,2.29],
+["coffee-hot","Drinks","Premium Hot Coffee","regular",5,0,1,0,1,1.89],
+["baja-freeze","Drinks","Mtn Dew® Baja Blast Freeze™","regular",260,0,69,0,1,3.59],
+["oj","Drinks","Tropicana® Orange Juice","",140,2,33,0,0,1.99],
+["water","Drinks","Water","free cup",0,0,0,0,0,0],
+["ref-strawpass","Drinks","Strawberry Passionfruit Agua Refresca","medium",100,0,25,0,1,3.99],
+["energy-pine-citrus","Drinks","Pineapple Citrus Energy","medium · 120mg caffeine",50,0,13,0,1,4.49],
+["f-brisk","Fountain","Brisk® Mango Fiesta","small",120,0,31,0,1,2.79],
+["f-drpepper","Fountain","Dr Pepper®","small",200,0,51,0,1,2.79],
+["f-g2","Fountain","G2 Gatorade® Fruit Punch","small",90,0,22,0,1,2.79],
+["f-lipton-sweet","Fountain","Lipton Sweet Tea","small",130,0,34,0,1,2.99],
+["f-dew","Fountain","Mtn Dew®","small",210,0,58,0,1,2.79],
+["f-baja","Fountain","Mtn Dew® Baja Blast™","small",220,0,59,0,1,2.79],
+["f-mug","Fountain","Mug® Root Beer","small",210,0,57,0,1,2.79],
+["f-pepsi","Fountain","Pepsi®","small",200,0,55,0,1,2.79],
+["f-starry","Fountain","Starry®","small",200,0,53,0,1,2.89],
+["f-trop-lemonade","Fountain","Tropicana Original Lemonade","small",210,0,54,0,1,2.99],
+["lx-stacker","Luxe Value","Avocado Ranch Chicken Stacker","",350,16,33,17,0,2.99],
+["lx-griller","Luxe Value","Beefy Potato Loaded Griller","",480,13,51,25,0,2.79],
+["lx-salad","Luxe Value","Mini Taco Salad","",280,11,26,15,0,2.79],
+["n-chips-cheese","Nachos","Chips and Nacho Cheese Sauce","",220,3,24,13,0,2.19],
+["n-bellgrande","Nachos","Nachos BellGrande® - Beef","",730,16,82,38,0,5.59],
+["dec-beefy-crunch","New","Beefy Crunch Burrito","",450,13,52,21,1,2.99],
+["dec-empanada","New","Caramel Apple Empanada","",290,3,37,14,1,2.99],
+["pj-melty","New","Melty Pepper Jack Steak Burrito","",440,20,44,18,1,3],
+["dec-meximelt","New","Meximelt®","",250,11,22,13,1,3.29],
+["dec-naked-chalupa","New","Naked Chicken Chalupa","",430,21,28,26,1,5.99],
+["tajin-cgc","New","Tajín® Cheesy Gordita Crunch","",460,20,40,25,1,5.99],
+["tajin-taco","New","Tajín® Taco","",210,8,14,13,1,2.99],
+["q-chicken","Quesadillas","Quesadilla - Chicken","",490,26,38,27,0,5.79],
+["s-bb-rice","Sides & Sweets","Black Beans & Rice","",160,4,28,4,0,1.79],
+["s-fiesta-pot","Sides & Sweets","Cheesy Fiesta Potatoes","",240,4,28,12,0,2.69],
+["s-cinnabon","Sides & Sweets","Cinnabon® Delights™","2 pk",170,2,16,10,0,1.69],
+["s-twists","Sides & Sweets","Cinnamon Twists","",170,1,27,6,0,1.69],
+["s-nacho-fries","Sides & Sweets","Nacho Fries","regular",350,4,38,20,1,2.89],
+["s-pintos","Sides & Sweets","Pintos N Cheese","",170,9,19,7,0,2.19],
+["sp-flatbread","Specialties","3-Cheese Chicken Flatbread Melt","",320,17,25,16,1,2.59],
+["sp-rollup","Specialties","Cheesy Roll Up","",170,9,15,9,0,1.69],
+["sp-cws","Specialties","Crunchwrap Supreme®","",530,16,71,21,0,5.99],
+["sp-mex-pizza","Specialties","Mexican Pizza","",530,20,47,31,0,5.69],
+["t-chalupa-beef","Tacos","Chalupa Supreme® - Beef","",350,13,31,20,0,4.99],
+["t-cgc","Tacos","Cheesy Gordita Crunch","",480,20,41,28,0,5.69],
+["t-crunchy","Tacos","Crunchy Taco","",170,8,13,9,0,1.99],
+["t-dcgc","Tacos","Doritos® Cheesy Gordita Crunch - Nacho Cheese","",480,19,40,27,1,5.69],
+["t-dlt","Tacos","Nacho Cheese Doritos® Locos Taco","",170,8,13,9,0,2.99],
+["t-soft-beef","Tacos","Soft Taco - Beef","",180,9,18,8,0,1.99],
+["t-spicy-potato","Tacos","Spicy Potato Soft Taco","",240,6,29,12,0,1.69]
 ];
 
 var CAT_ORDER = ["Breakfast","Burritos","Cantina Chicken","Dirty Sodas","Drinks","Fountain","Luxe Value","Nachos","New","Quesadillas","Sides & Sweets","Specialties","Tacos","Veggie Cravings"];
@@ -150,14 +155,14 @@ var COORDS = [[41.25933,-95.97077],[41.32834,-95.95829],[41.26165,-95.88856],[41
    caffeinated drinks all placed by stage 19 (Rockstar energy at stage 5),
    the rest calorie-balanced (~570-750 cal/stop), max 2 drinks per stop.
    Charger stages (6 and 24) order nothing. */
-var PLAN = [["bk-cw-sausage"],["gtb-sausage","coffee-hot","bk-salsa"],["bk-q-sausage","oj"],["ctb-sausage","cin-coffee-hot","hash-brown"],["ref-rock-punch","lx-griller"],[],["f-baja","s-nacho-fries","t-soft-beef"],["f-lipton-sweet","cbr","s-twists"],["f-brisk","cdb","jal-citrus"],["f-drpepper","bs-beef"],["ds-baja","lx-salad","sp-rollup"],["f-pepsi","sp-flatbread"],["f-trop-lemonade","t-chalupa-beef"],["n-bellgrande"],["f-dew","bean-burrito","t-crunchy"],["baja-freeze","cc-crispy","cc-soft"],["gcb"],["pj-fries"],["pj-melty"],["cc-rolled-q","av-verde"],["sp-mex-pizza","s-bb-rice"],["ref-strawpass","cc-burrito"],["sp-cws","s-pintos"],[],["f-mug","lx-stacker","t-dlt"],["q-chicken","t-spicy-potato"],["t-dcgc","n-chips-cheese"],["cc-burr-ranch","cc-strips"],["water","b5l","cc-taco-ranch"],["f-g2","cc-bowl"],["f-starry","sp-enchirito","s-cinnabon"],["t-cgc","s-fiesta-pot"]];
+var PLAN = [["bk-cw-sausage"],["gtb-sausage","coffee-hot","bk-salsa"],["bk-q-sausage","oj"],["ctb-sausage","cin-coffee-hot","hash-brown"],["energy-pine-citrus","lx-griller"],[],["f-baja","s-nacho-fries","t-soft-beef"],["f-lipton-sweet","cbr","s-twists"],["f-brisk","cdb"],["f-drpepper","bs-beef"],["ds-baja","lx-salad","sp-rollup"],["f-pepsi","sp-flatbread"],["f-trop-lemonade","t-chalupa-beef"],["n-bellgrande"],["f-dew","bean-burrito","t-crunchy"],["baja-freeze","cc-crispy","cc-soft"],["gcb"],["tajin-taco","tajin-cgc"],["pj-melty"],["cc-rolled-q","av-verde"],["sp-mex-pizza","s-bb-rice"],["ref-strawpass","cc-burrito"],["sp-cws","s-pintos"],[],["f-mug","lx-stacker","t-dlt"],["q-chicken","t-spicy-potato"],["t-dcgc","n-chips-cheese"],["dec-naked-chalupa","dec-empanada"],["water","b5l","dec-meximelt"],["f-g2","cc-bowl"],["f-starry","dec-beefy-crunch","s-cinnabon"],["t-cgc","s-fiesta-pot"]];
 var PLAN_STOP = {};
 PLAN.forEach(function (ids, i) { ids.forEach(function (id) { PLAN_STOP[id] = i; }); });
 
 /* planned rider per item: one item per rider per stop, balanced on food AND
    drink calories (food 3,325-3,600 · drink 510-630 · total 3,835-4,230),
    13-14 items each, 2-3 breakfast-stop items, 2-3 caffeinated drinks each */
-var PLAN_RIDER = {"bk-cw-sausage":4,"gtb-sausage":1,"coffee-hot":3,"bk-salsa":2,"bk-q-sausage":2,"oj":0,"ctb-sausage":3,"cin-coffee-hot":2,"hash-brown":0,"ref-rock-punch":1,"lx-griller":0,"f-baja":4,"s-nacho-fries":3,"t-soft-beef":2,"f-lipton-sweet":3,"cbr":1,"s-twists":0,"f-brisk":1,"cdb":3,"jal-citrus":4,"f-drpepper":0,"bs-beef":2,"ds-baja":2,"lx-salad":4,"sp-rollup":0,"f-pepsi":3,"sp-flatbread":1,"f-trop-lemonade":1,"t-chalupa-beef":4,"n-bellgrande":0,"f-dew":4,"bean-burrito":3,"t-crunchy":2,"baja-freeze":0,"cc-crispy":2,"cc-soft":1,"gcb":4,"pj-fries":3,"pj-melty":1,"cc-rolled-q":2,"av-verde":0,"sp-mex-pizza":0,"s-bb-rice":4,"ref-strawpass":2,"cc-burrito":3,"sp-cws":2,"s-pintos":1,"f-mug":3,"lx-stacker":4,"t-dlt":0,"q-chicken":1,"t-spicy-potato":0,"t-dcgc":4,"n-chips-cheese":3,"cc-burr-ranch":2,"cc-strips":0,"water":4,"b5l":3,"cc-taco-ranch":1,"f-g2":1,"cc-bowl":4,"f-starry":4,"sp-enchirito":1,"s-cinnabon":2,"t-cgc":0,"s-fiesta-pot":3};
+var PLAN_RIDER = {"bk-cw-sausage":4,"gtb-sausage":1,"coffee-hot":3,"bk-salsa":2,"bk-q-sausage":2,"oj":0,"ctb-sausage":3,"cin-coffee-hot":2,"hash-brown":0,"energy-pine-citrus":1,"lx-griller":0,"f-baja":4,"s-nacho-fries":3,"t-soft-beef":2,"f-lipton-sweet":3,"cbr":1,"s-twists":0,"f-brisk":1,"cdb":3,"f-drpepper":0,"bs-beef":2,"ds-baja":2,"lx-salad":4,"sp-rollup":0,"f-pepsi":3,"sp-flatbread":1,"f-trop-lemonade":1,"t-chalupa-beef":4,"n-bellgrande":0,"f-dew":4,"bean-burrito":3,"t-crunchy":2,"baja-freeze":0,"cc-crispy":2,"cc-soft":1,"gcb":4,"tajin-taco":1,"tajin-cgc":2,"pj-melty":1,"cc-rolled-q":2,"av-verde":0,"sp-mex-pizza":0,"s-bb-rice":4,"ref-strawpass":2,"cc-burrito":3,"sp-cws":2,"s-pintos":1,"f-mug":3,"lx-stacker":4,"t-dlt":0,"q-chicken":1,"t-spicy-potato":0,"t-dcgc":4,"n-chips-cheese":3,"dec-naked-chalupa":3,"dec-empanada":0,"water":4,"b5l":3,"dec-meximelt":1,"f-g2":1,"cc-bowl":4,"f-starry":4,"dec-beefy-crunch":1,"s-cinnabon":2,"t-cgc":0,"s-fiesta-pot":3};
 
 var JERSEYS = ["#FF3D9A","#3EE8D2","#FFC53D","#8FE85C","#B08CFF"];
 var DEFAULT_NAMES = ["Wyatt","Jack","Tyler","Alex","Ryan"];
@@ -290,8 +295,8 @@ function connectStream() {
 
 /* ---------------- derived ---------------- */
 function itemById(id) { for (var i = 0; i < ITEMS.length; i++) if (ITEMS[i][0] === id) return ITEMS[i]; return null; }
-/* drink = the three drink categories, plus Pineapple Freeze (filed under "New") */
-function isDrink(it) { return it[1] === 'Dirty Sodas' || it[1] === 'Drinks' || it[1] === 'Fountain' || it[0] === 'pineapple-freeze'; }
+function isDrink(it) { return it[1] === 'Dirty Sodas' || it[1] === 'Drinks' || it[1] === 'Fountain'; }
+function money(n) { return '$' + n.toFixed(2); }
 function itemsAtStop(si) {
   var out = [];
   for (var i = 0; i < ITEMS.length; i++) {
@@ -305,6 +310,12 @@ function planCal(si) {
   (PLAN[si] || []).forEach(function (id) { var it = itemById(id); if (it) s += it[4]; });
   return s;
 }
+function planPrice(si) {
+  var s = 0;
+  (PLAN[si] || []).forEach(function (id) { var it = itemById(id); if (it) s += it[9]; });
+  return s;
+}
+function groupPriceTotal() { var s = 0; for (var i = 0; i < ITEMS.length; i++) s += ITEMS[i][9]; return s; }
 function pInit(p) { return esc((state.names[p] || '?').charAt(0)); }
 function planItemLabel(id) {
   var it = itemById(id); if (!it) return '';
@@ -568,7 +579,7 @@ function renderRace(pct) {
       '<div><div class="addr">' + esc(STOPS[ns][0]) + '</div><div class="city">' + esc(STOPS[ns][1]) + '</div></div>' +
       '<a class="navbtn" target="_blank" rel="noopener" href="' + mapsUrl(ns) + '">Navigate</a>' +
       '</div>' +
-      ((PLAN[ns] || []).length ? '<div class="stopitems plan" style="margin-top:10px" data-editorder="' + ns + '"><em>order plan · ~' + planCal(ns).toLocaleString() + ' cal:</em> ' + PLAN[ns].map(planItemLabel).join(' · ') + '</div>' : '') +
+      ((PLAN[ns] || []).length ? '<div class="stopitems plan" style="margin-top:10px" data-editorder="' + ns + '"><em>order plan · ~' + planCal(ns).toLocaleString() + ' cal · ~' + money(planPrice(ns)) + ':</em> ' + PLAN[ns].map(planItemLabel).join(' · ') + '</div>' : '') +
       '</div>';
   } else {
     h += '<div class="card"><h2>Route</h2><div class="disp" style="font-size:22px;color:var(--gold)">Every stage complete 🏆</div></div>';
@@ -589,10 +600,14 @@ function renderRace(pct) {
   ITEMS.forEach(function (it) { if (isDrink(it)) drinkAll += it[4]; else foodAll += it[4]; });
   var foodEaten = 0, drinkEaten = 0;
   totals.forEach(function (t) { foodEaten += t.foodCal; drinkEaten += t.drinkCal; });
+  var spendEaten = 0;
+  for (var sid in state.items) { var sit = itemById(sid); if (sit) spendEaten += sit[9]; }
+  var spendAll = groupPriceTotal();
   h += '<div class="card"><h2>Group intake</h2>' +
     '<div class="kv"><span class="k">Calories eaten</span><span class="num"><b>' + calEaten.toLocaleString() + '</b> / ' + calAll.toLocaleString() + '</span></div>' +
     '<div class="kv"><span class="k">🌮 from food</span><span class="num"><b>' + foodEaten.toLocaleString() + '</b> / ' + foodAll.toLocaleString() + '</span></div>' +
     '<div class="kv"><span class="k">🥤 from drinks</span><span class="num"><b>' + drinkEaten.toLocaleString() + '</b> / ' + drinkAll.toLocaleString() + '</span></div>' +
+    '<div class="kv"><span class="k">💵 Damage</span><span class="num"><b>' + money(spendEaten) + '</b> / ~' + money(spendAll) + ' + tax</span></div>' +
     '<div class="kv"><span class="k">Fair share</span><span class="num">~' + Math.round(ITEMS.length / 5) + ' items · ~' + Math.round(calAll / 5).toLocaleString() + ' cal each</span></div>' +
     '<div class="pbar"><i style="width:' + Math.min(100, Math.round(calEaten / calAll * 100)) + '%;background:linear-gradient(90deg,var(--teal),var(--gold))"></i></div>' +
     '</div>';
@@ -628,10 +643,10 @@ function renderMenu() {
         '<span class="nm">' + esc(it[2]) + (it[3] ? ' <span class="note">' + esc(it[3]) + '</span>' : '') +
         (e && e.s != null ? ' <span class="note num">· stage ' + (e.s + 1) + '</span>'
           : !e && PLAN_STOP[it[0]] != null ? ' <span class="note num">· plan stg ' + (PLAN_STOP[it[0]] + 1) + (PLAN_RIDER[it[0]] != null ? ' · ' + pInit(PLAN_RIDER[it[0]]) : '') + '</span>' : '') + '</span>' +
-        '<span class="cal num">' + it[4] + (it[8] ? '~' : '') + ' cal</span></button>';
+        '<span class="cal num">' + money(it[9]) + ' · ' + it[4] + (it[8] ? '~' : '') + ' cal</span></button>';
     });
   });
-  h += '<div class="finish-note">~ = estimated nutrition (not published by Taco Bell)</div>';
+  h += '<div class="finish-note">~ = estimated nutrition · prices from the Omaha tacobell.com store menu (pre-tax, vary slightly by store)</div>';
   return h;
 }
 
@@ -660,7 +675,7 @@ function renderRoute() {
     } else if (status === 'done' && !isCharger(j)) {
       orderHtml = '<div class="stopitems" data-editorder="' + j + '">+ add what was ordered</div>';
     } else if (status !== 'skip' && (PLAN[j] || []).length) {
-      orderHtml = '<div class="stopitems plan" data-editorder="' + j + '"><em>plan · ~' + planCal(j).toLocaleString() + ' cal:</em> ' + PLAN[j].map(planItemLabel).join(' · ') + '</div>';
+      orderHtml = '<div class="stopitems plan" data-editorder="' + j + '"><em>plan · ~' + planCal(j).toLocaleString() + ' cal · ~' + money(planPrice(j)) + ':</em> ' + PLAN[j].map(planItemLabel).join(' · ') + '</div>';
     }
     h += '<div class="stoprow' + (status === 'done' ? ' done' : status === 'skip' ? ' skip' : '') + '">' +
       '<div class="stage-badge' + (isFinish ? ' finish' : '') + '" style="width:44px;height:44px"><span class="sn disp num" style="font-size:16px">' + (isCharger(j) ? '⚡' : (j + 1)) + '</span><span class="sk">' + (isFinish ? 'finish' : isCharger(j) ? 'charge' : 'stage') + '</span></div>' +
@@ -686,14 +701,14 @@ function renderPlan() {
   }
   h += '</div>';
 
-  var totalCal = 0, totalN = 0, eatenN = 0, eatenCal = 0;
+  var totalCal = 0, totalN = 0, eatenN = 0, eatenCal = 0, totalSpend = 0;
   var rows = '';
   for (var si = 0; si < STOPS.length; si++) {
     var mine = (PLAN[si] || []).filter(function (id) { return PLAN_RIDER[id] === sel; });
     if (!mine.length) continue;
     mine.forEach(function (id) {
       var it = itemById(id); if (!it) return;
-      totalCal += it[4]; totalN++;
+      totalCal += it[4]; totalN++; totalSpend += it[9];
       var e = state.items[id];
       var status;
       if (e && e.p === sel) { status = '<span style="color:var(--good)">✓ eaten</span>'; eatenN++; eatenCal += it[4]; }
@@ -708,7 +723,7 @@ function renderPlan() {
   }
 
   h += '<div class="card"><h2>' + esc(state.names[sel]) + '’s day</h2>' +
-    '<div class="kv"><span class="k">Planned</span><span class="num">' + totalN + ' items · ~' + totalCal.toLocaleString() + ' cal</span></div>' +
+    '<div class="kv"><span class="k">Planned</span><span class="num">' + totalN + ' items · ~' + totalCal.toLocaleString() + ' cal · ~' + money(totalSpend) + '</span></div>' +
     '<div class="kv"><span class="k">Eaten so far</span><span class="num">' + eatenN + ' items · ' + eatenCal.toLocaleString() + ' cal</span></div>' +
     '<div class="pbar"><i style="width:' + (totalN ? Math.round(eatenN / totalN * 100) : 0) + '%;background:' + JERSEYS[sel] + '"></i></div>' +
     '</div>';
@@ -852,7 +867,7 @@ function openEatSheet(id) {
   var atStop = cur && cur.s != null ? cur.s : (nextStopIdx() >= 0 ? nextStopIdx() : undefined);
   var h = '<div class="overlay" id="overlay"><div class="sheet">' +
     '<h3>' + esc(it[2]) + (it[3] ? ' · ' + esc(it[3]) : '') + '</h3>' +
-    '<div class="sub num">' + it[4] + (it[8] ? '~' : '') + ' cal · ' + it[5] + 'g protein · ' + it[6] + 'g carbs · ' + it[7] + 'g fat' +
+    '<div class="sub num">' + money(it[9]) + ' · ' + it[4] + (it[8] ? '~' : '') + ' cal · ' + it[5] + 'g protein · ' + it[6] + 'g carbs · ' + it[7] + 'g fat' +
     (atStop != null ? '<br>logs to stage ' + (atStop + 1) + ' · ' + esc(STOPS[atStop][0]) : '') + '</div>' +
     '<div class="eatgrid">';
   if (me >= 0 && !cur) h += '<button class="eatbtn big" data-eat="' + me + '" style="background:' + JERSEYS[me] + '">' + esc(state.names[me]) + ' ate it</button>';

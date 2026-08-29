@@ -1,6 +1,6 @@
 # Tour de Taco Bell
 
-A mobile web app for tracking a one-day driving tour (one car, Tesla Model Y) of every Taco Bell in the Omaha/Council Bluffs metro: 30 stops plus 2 Supercharger stops, 66 menu items, 5 riders. The goal is to visit every store and collectively order and finish the whole menu along the way — one classic representative of each item family (variant duplicates like the chicken/steak/cheese quesadillas collapse to the classic, here the Chicken Quesadilla; the Doritos Cheesy Gordita Crunch counts as its own item), with every multi-size item ordered at its smallest size (16 oz fountain drinks, regular freezes/fries, 2 pc strips, 2 pk Cinnabon Delights). Full 107-item menu lives in `items.json`. Race day: 2026-08-30.
+A mobile web app for tracking a one-day driving tour (one car, Tesla Model Y) of every Taco Bell in the Omaha/Council Bluffs metro: 30 stops plus 2 Supercharger stops, 66 menu items, 5 riders. The goal is to visit every store and collectively order and finish the whole menu along the way — one classic representative of each item family (variant duplicates like the chicken/steak/cheese quesadillas collapse to the classic, here the Chicken Quesadilla; shell/seasoning twists like the Doritos Cheesy Gordita Crunch and the Tajín items count as their own items), with every multi-size item ordered at its smallest size (16 oz fountain drinks, regular freezes/fries, 2 pk Cinnabon Delights). Menu refreshed 2026-08-29 against the tacobell.com menu API for an Omaha store: the discontinued Crispy Chicken Avocado Ranch line, Pepper Jack Steak Nacho Fries, Jalapeno Citrus packet, Enchirito, and Rockstar Refresca are out; the Tajín line (Taco, Cheesy Gordita Crunch), the Decades menu (Naked Chicken Chalupa, Meximelt, Beefy Crunch Burrito, Caramel Apple Empanada), and Pineapple Citrus Energy are in — still 66 items, now with that store's prices (~$219 + tax for the full board). The original 107-item pull lives in `items.json`. Race day: 2026-08-30.
 
 ## The app
 
@@ -19,7 +19,7 @@ Item-to-stop and item-to-rider assignments are precomputed in the `PLAN` and `PL
 - Breakfast items and coffee/OJ at stops 1-4 (breakfast ends ~11 AM).
 - All caffeinated drinks placed by stage 19, the Rockstar energy drink early (stage 5).
 - Stops calorie-balanced to roughly 570-750 cal each, max 2 drinks per stop.
-- Riders balanced to ~4,060 cal (3,325-3,600 food / 510-630 drink) and 13-14 items each.
+- Riders balanced to ~4,060 cal (3,880-4,200 total / 470-630 drink) and 12-14 items each.
 
 ### The route
 
