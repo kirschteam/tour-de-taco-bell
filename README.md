@@ -1,6 +1,6 @@
 # Tour de Taco Bell
 
-A mobile web app for tracking a one-day bike race across every Taco Bell in the Omaha/Council Bluffs metro: 30 stops, 65 menu items, 5 riders. The goal is to visit every store and collectively order and finish the whole menu along the way — one representative of each item family (variant duplicates like chicken/steak/cheese quesadillas collapse to the lowest-calorie one, and multi-size items are ordered at the smallest size). Full 107-item menu lives in `items.json`. Race day: 2026-08-30.
+A mobile web app for tracking a one-day driving tour (one car, Tesla Model Y) of every Taco Bell in the Omaha/Council Bluffs metro: 30 stops, 65 menu items, 5 riders. The goal is to visit every store and collectively order and finish the whole menu along the way — one representative of each item family (variant duplicates like chicken/steak/cheese quesadillas collapse to the lowest-calorie one, and multi-size items are ordered at the smallest size). Full 107-item menu lives in `items.json`. Race day: 2026-08-30.
 
 ## The app
 
