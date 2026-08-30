@@ -113,7 +113,10 @@ var ITEMS = [
    discontinued: the Crispy Chicken line incl. Chipotle Bacon Melt, both Rockstar
    Refrescas, Dragonfruit Berry Refresca — plus the refresh's earlier cuts).
    Prices and calories are live store numbers; macros carried from the original
-   pull, scaled + est-flagged where calories drifted >5%. */
+   pull, scaled + est-flagged where calories drifted >5%. Also includes the six
+   items the store launched after the original pull (Fresca/Melty Steak
+   Burritos, Chicken Enchilada Nacho Fries, Strawberry Tropics Energy, the two
+   new freezes) — sibling-estimated macros, est-flagged. */
 var STRETCH_ROWS = [
 ["bk-cal-cw-bacon","Breakfast","Breakfast California Crunchwrap","",640,21,51,38,1,4.29,1],
 ["bk-cw-bacon","Breakfast","Breakfast Crunchwrap - Bacon","",660,21,51,42,0,4.19,1],
@@ -132,6 +135,10 @@ var STRETCH_ROWS = [
 ["cin-coffee-iced","Drinks","Cinnabon® Delights™ Coffee","iced · regular",180,1,32,4,1,2.29,1],
 ["coffee-iced","Drinks","Regular Iced Coffee","regular",60,0,8,2,1,1.89,1],
 ["ref-mango","Drinks","Mango Peach Agua Refresca","medium",100,0,25,0,1,3.99,1],
+["energy-straw-tropics","Drinks","Strawberry Tropics Energy","medium · 120mg caffeine",50,0,13,0,1,4.49,1],
+["energy-pine-freeze","Drinks","Pineapple Citrus Energy Freeze","regular",150,0,37,0,1,4.29,1],
+["tajin-freeze","Drinks","Tajín® Pineapple Strawberry Freeze","regular",260,0,67,0,1,3.99,1],
+["pineapple-freeze","Drinks","Pineapple Freeze™","regular",260,0,67,0,1,3.99,1],
 ["f-diet-pepsi","Fountain","Diet Pepsi®","small",0,0,0,0,0,2.99,1],
 ["f-lipton-unsweet","Fountain","Lipton Unsweetened Iced Tea","small",0,0,0,0,0,2.79,1],
 ["f-midnight","Fountain","Mtn Dew® Baja Midnight™","small",220,0,58,0,1,2.89,1],
@@ -142,7 +149,9 @@ var STRETCH_ROWS = [
 ["lx-dip","Luxe Value","Chips and Nacho Supreme Dip","",360,7,34,22,1,2.79,1],
 ["n-chips-guac","Nachos","Chips and Guacamole","",230,3,25,15,1,3.19,1],
 ["pj-fresca","New","Fresca Pepper Jack Steak Burrito","",500,24,53,20,1,3,1],
-["pineapple-freeze","New","Pineapple Freeze™","regular",260,0,67,0,1,3.99,1],
+["fresca-steak","New","Fresca Steak Burrito","",490,24,52,20,1,3,1],
+["melty-steak","New","Melty Steak Burrito","",440,20,44,18,1,3,1],
+["enchilada-fries","New","Chicken Enchilada Nacho Fries","",500,16,46,27,1,5.99,1],
 ["q-cheese","Quesadillas","Quesadilla - Cheese","",440,17,37,26,0,4.99,1],
 ["q-steak","Quesadillas","Quesadilla - Steak","",500,24,37,26,0,6.29,1],
 ["s-black-beans","Sides & Sweets","Black Beans","",50,2,8,1,0,1.79,1],
@@ -731,7 +740,7 @@ function renderRace(pct) {
     '<div class="kv"><span class="k">Stretch items eaten</span><span class="num"><b>' + st.eatenN + '</b> / ' + STRETCH_N + ' · ' + st.eatenCal.toLocaleString() + ' / ' + st.cal.toLocaleString() + ' cal</span></div>' +
     '<div class="kv"><span class="k">Full-board damage</span><span class="num">+~' + money(st.price) + ' on top if we clear it</span></div>' +
     '<div class="pbar"><i style="width:' + Math.round(ec.all / ITEMS.length * 100) + '%;background:linear-gradient(90deg,var(--gold),var(--teal))"></i></div>' +
-    '<div style="font-size:12px;color:var(--muted);margin-top:8px">The ' + STRETCH_N + ' variants deduped from the original 107-item menu, back as optional ⭐ items. No plan slots, no pressure — grab them off the Menu tab if we\'re feeling up for it.</div>' +
+    '<div style="font-size:12px;color:var(--muted);margin-top:8px">' + STRETCH_N + ' optional ⭐ items: the variants deduped from the original 107-item menu, plus everything the store has launched since. No plan slots, no pressure — grab them off the Menu tab if we\'re feeling up for it.</div>' +
     '</div>';
   h += '<div class="finish-note">Sunday 8/30 · 30 Taco Bells + 2 charge stops · ' + CORE_ITEMS.length + ' items (+' + STRETCH_N + ' ⭐ stretch) · 5 riders · finish: 168th &amp; Maple</div>';
   h += '<div class="resetwrap"><button class="btn danger" id="resetbtn">Reset race data</button></div>';
