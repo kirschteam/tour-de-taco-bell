@@ -105,6 +105,60 @@ var ITEMS = [
 ["t-spicy-potato","Tacos","Spicy Potato Soft Taco","",240,6,29,12,0,1.69]
 ];
 
+/* STRETCH GOAL: the full original menu. The variant items deduped out of the
+   original 107-item pull, added back as OPTIONAL — 11th field = 1 marks stretch.
+   They don't count toward the core goal or the plan; they feed the separate
+   stretch tracker on the Race tab. Verified against the live tacobell.com menu
+   for store 035284 on 2026-08-30: only still-sold variants included (dropped as
+   discontinued: the Crispy Chicken line incl. Chipotle Bacon Melt, both Rockstar
+   Refrescas, Dragonfruit Berry Refresca — plus the refresh's earlier cuts).
+   Prices and calories are live store numbers; macros carried from the original
+   pull, scaled + est-flagged where calories drifted >5%. */
+var STRETCH_ROWS = [
+["bk-cal-cw-bacon","Breakfast","Breakfast California Crunchwrap","",640,21,51,38,1,4.29,1],
+["bk-cw-bacon","Breakfast","Breakfast Crunchwrap - Bacon","",660,21,51,42,0,4.19,1],
+["bk-q-bacon","Breakfast","Breakfast Quesadilla - Bacon","",500,19,38,31,0,3.49,1],
+["bk-q-steak","Breakfast","Breakfast Quesadilla - Steak","",500,22,38,29,0,3.69,1],
+["ctb-bacon","Breakfast","Cheesy Toasted Breakfast Burrito - Bacon","",350,13,34,17,0,1.69,1],
+["ctb-potato","Breakfast","Cheesy Toasted Breakfast Burrito - Fiesta Potato","",340,9,41,17,0,1.59,1],
+["gtb-bacon","Breakfast","Grande Toasted Breakfast Burrito - Bacon","",570,22,51,30,0,2.99,1],
+["gtb-steak","Breakfast","Grande Toasted Breakfast Burrito - Steak","",560,24,51,29,0,3.79,1],
+["bb-gcb","Burritos","Black Bean Grilled Cheese Burrito","",680,17,82,31,1,5.49,1],
+["ds-baja-freeze","Dirty Sodas","Mtn Dew® Baja Blast™ Dirty Soda Freeze","regular",380,0,90,2,1,4.29,1],
+["ds-baja-zero","Dirty Sodas","Mtn Dew® Baja Blast™ Zero Sugar Dirty Soda","small",30,0,6,1,1,3.29,1],
+["ds-midnight","Dirty Sodas","Mtn Dew® Baja Midnight™ Dirty Soda","small",250,0,59,1,1,2.99,1],
+["ds-pepsi","Dirty Sodas","Pepsi® Dirty Soda","small",230,0,55,1,1,2.99,1],
+["ds-lemonade","Dirty Sodas","Tropicana® Dirty Lemonade","small",210,0,51,1,1,2.99,1],
+["cin-coffee-iced","Drinks","Cinnabon® Delights™ Coffee","iced · regular",180,1,32,4,1,2.29,1],
+["coffee-iced","Drinks","Regular Iced Coffee","regular",60,0,8,2,1,1.89,1],
+["ref-mango","Drinks","Mango Peach Agua Refresca","medium",100,0,25,0,1,3.99,1],
+["f-diet-pepsi","Fountain","Diet Pepsi®","small",0,0,0,0,0,2.99,1],
+["f-lipton-unsweet","Fountain","Lipton Unsweetened Iced Tea","small",0,0,0,0,0,2.79,1],
+["f-midnight","Fountain","Mtn Dew® Baja Midnight™","small",220,0,58,0,1,2.89,1],
+["f-baja-zero","Fountain","Mtn Dew® Baja Blast Zero Sugar","small",0,0,0,0,0,2.79,1],
+["f-dew-zero","Fountain","Mtn Dew® Zero Sugar","small",5,0,1,0,1,2.79,1],
+["f-pepsi-zero","Fountain","Pepsi® Zero Sugar","small",0,0,0,0,0,2.79,1],
+["f-wild-straw","Fountain","Wild Strawberry Freeze","regular",260,0,70,0,1,3.59,1],
+["lx-dip","Luxe Value","Chips and Nacho Supreme Dip","",360,7,34,22,1,2.79,1],
+["n-chips-guac","Nachos","Chips and Guacamole","",230,3,25,15,1,3.19,1],
+["pj-fresca","New","Fresca Pepper Jack Steak Burrito","",500,24,53,20,1,3,1],
+["pineapple-freeze","New","Pineapple Freeze™","regular",260,0,67,0,1,3.99,1],
+["q-cheese","Quesadillas","Quesadilla - Cheese","",440,17,37,26,0,4.99,1],
+["q-steak","Quesadillas","Quesadilla - Steak","",500,24,37,26,0,6.29,1],
+["s-black-beans","Sides & Sweets","Black Beans","",50,2,8,1,0,1.79,1],
+["sp-bb-cws","Specialties","Black Bean Crunchwrap Supreme®","",520,13,77,16,0,5.99,1],
+["sp-veg-pizza","Specialties","Veggie Mexican Pizza","",460,14,46,25,1,5.69,1],
+["t-bb-chalupa","Tacos","Black Bean Chalupa Supreme®","",340,9,36,18,1,4.79,1],
+["t-crunchy-sup","Tacos","Crunchy Taco Supreme®","",190,8,15,11,0,2.89,1],
+["t-dlt-sup","Tacos","Nacho Cheese Doritos® Locos Taco Supreme®","",190,8,15,11,0,3.89,1],
+["t-soft-sup","Tacos","Soft Taco Supreme® - Beef","",200,10,20,10,0,2.89,1],
+["veggie-bowl","Veggie Cravings","Veggie Bowl","",410,11,51,18,1,8.29,1]
+];
+STRETCH_ROWS.forEach(function (r) { ITEMS.push(r); });
+function isStretch(it) { return !!it[10]; }
+var CORE_ITEMS = ITEMS.filter(function (it) { return !isStretch(it); });
+var STRETCH_N = ITEMS.length - CORE_ITEMS.length;
+
 var CAT_ORDER = ["Breakfast","Burritos","Cantina Chicken","Dirty Sodas","Drinks","Fountain","Luxe Value","Nachos","New","Quesadillas","Sides & Sweets","Specialties","Tacos","Veggie Cravings"];
 
 /* [address, city, type?] in route order; type "chg" = Tesla Supercharger; last = the finish.
@@ -317,14 +371,27 @@ function planPrice(si) {
   (PLAN[si] || []).forEach(function (id) { var it = itemById(id); if (it) s += it[9]; });
   return s;
 }
-function groupPriceTotal() { var s = 0; for (var i = 0; i < ITEMS.length; i++) s += ITEMS[i][9]; return s; }
+function groupPriceTotal() { var s = 0; for (var i = 0; i < CORE_ITEMS.length; i++) s += CORE_ITEMS[i][9]; return s; }
 function pInit(p) { return esc((state.names[p] || '?').charAt(0)); }
 function planItemLabel(id) {
   var it = itemById(id); if (!it) return '';
   var p = PLAN_RIDER[id];
   return esc(it[2]) + (p != null ? ' <b style="color:' + JERSEYS[p] + '">' + pInit(p) + '</b>' : '');
 }
-function eatenCount() { var n = 0; for (var k in state.items) n++; return n; }
+function eatenCounts() {
+  var c = { core: 0, stretch: 0, all: 0 };
+  for (var k in state.items) { var it = itemById(k); if (!it) continue; c.all++; if (isStretch(it)) c.stretch++; else c.core++; }
+  return c;
+}
+function stretchTotals() {
+  var t = { cal: 0, price: 0, eatenN: 0, eatenCal: 0, eatenPrice: 0 };
+  ITEMS.forEach(function (it) {
+    if (!isStretch(it)) return;
+    t.cal += it[4]; t.price += it[9];
+    if (state.items[it[0]]) { t.eatenN++; t.eatenCal += it[4]; t.eatenPrice += it[9]; }
+  });
+  return t;
+}
 function stopCounts() {
   var done = 0, skip = 0;
   for (var k in state.stops) { if (state.stops[k].s === 'done') done++; else if (state.stops[k].s === 'skip') skip++; }
@@ -332,22 +399,23 @@ function stopCounts() {
 }
 function overallPct() {
   var sc = stopCounts();
-  var ip = eatenCount() / ITEMS.length;
+  var ip = eatenCounts().core / CORE_ITEMS.length;
   var sp = sc.active ? sc.done / sc.active : 1;
   return Math.round((ip * ITEM_W + sp * STOP_W) * 100);
 }
 function playerTotals() {
   var t = [];
-  for (var p = 0; p < 5; p++) t.push({ items: 0, cal: 0, pro: 0, carb: 0, fat: 0, foodCal: 0, drinkCal: 0 });
+  for (var p = 0; p < 5; p++) t.push({ items: 0, stretch: 0, cal: 0, pro: 0, carb: 0, fat: 0, foodCal: 0, drinkCal: 0 });
   for (var id in state.items) {
     var it = itemById(id); if (!it) continue;
     var p2 = state.items[id].p; if (p2 == null || !t[p2]) continue;
     t[p2].items++; t[p2].cal += it[4]; t[p2].pro += it[5]; t[p2].carb += it[6]; t[p2].fat += it[7];
+    if (isStretch(it)) t[p2].stretch++;
     if (isDrink(it)) t[p2].drinkCal += it[4]; else t[p2].foodCal += it[4];
   }
   return t;
 }
-function groupCalTotal() { var s = 0; for (var i = 0; i < ITEMS.length; i++) s += ITEMS[i][4]; return s; }
+function groupCalTotal() { var s = 0; for (var i = 0; i < CORE_ITEMS.length; i++) s += CORE_ITEMS[i][4]; return s; }
 /* 0-based competition rank per rider (ties share a rank); -1 = unranked (0 cal) */
 function squadRanks(totals) {
   return totals.map(function (t) {
@@ -401,8 +469,8 @@ function etaInfo() {
   return { label: fmtClock(eta), sub: 'pace ' + Math.round(pace / 60000) + ' min/stop · ' + remaining + ' stops to go' };
 }
 function breakfastLeft() {
-  var n = 0;
-  for (var i = 0; i < ITEMS.length; i++) if (ITEMS[i][1] === 'Breakfast' && !state.items[ITEMS[i][0]]) n++;
+  var n = { core: 0, stretch: 0 };
+  for (var i = 0; i < ITEMS.length; i++) if (ITEMS[i][1] === 'Breakfast' && !state.items[ITEMS[i][0]]) { if (isStretch(ITEMS[i])) n.stretch++; else n.core++; }
   return n;
 }
 function isRaceMorning() {
@@ -466,6 +534,7 @@ var CSS = [
 '.cathdr .cn{font-size:15px;color:var(--teal)}.cathdr .cp{font-size:12px;color:var(--muted)}',
 '.itemrow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-bottom:8px;cursor:pointer;color:var(--ink);font-family:inherit;font-size:15px}',
 '.itemrow.done{background:#20301c;border-color:#33502b}',
+'.itemrow.stretch{border-style:dashed}.itemrow.stretch.done{border-style:solid}',
 '.itemrow .nm{flex:1;min-width:0}.itemrow .nm .note{color:var(--muted);font-size:12px}',
 '.itemrow .cal{flex:0 0 auto;font-size:13px;color:var(--muted)}',
 '.pchip{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#1B0B26}',
@@ -589,7 +658,7 @@ function render() {
 }
 
 function renderRace(pct) {
-  var sc = stopCounts(), eaten = eatenCount(), eta = etaInfo();
+  var sc = stopCounts(), ec = eatenCounts(), eta = etaInfo();
   var ns = nextStopIdx();
   var totals = playerTotals();
   var calEaten = 0; totals.forEach(function (t) { calEaten += t.cal; });
@@ -601,7 +670,7 @@ function renderRace(pct) {
     '<circle class="ringfg" cx="64" cy="64" r="' + r + '" fill="none" stroke="#FF3D9A" stroke-linecap="round" stroke-width="11" stroke-dasharray="' + circ + '" stroke-dashoffset="' + (circ * (1 - pct / 100)) + '"/>' +
     '</svg><div class="ringlabel"><span class="pct disp num">' + pct + '%</span><span class="pctsub">complete</span></div></div>' +
     '<div class="hero-stats">' +
-    '<div class="stat"><div class="v disp num">' + (ITEMS.length - eaten) + '</div><div class="k">items left of ' + ITEMS.length + '</div></div>' +
+    '<div class="stat"><div class="v disp num">' + (CORE_ITEMS.length - ec.core) + '</div><div class="k">items left of ' + CORE_ITEMS.length + '</div></div>' +
     '<div class="stat"><div class="v disp num">' + (sc.active - sc.done) + '</div><div class="k">stops left of ' + sc.active + (sc.skip ? ' (' + sc.skip + ' skipped)' : '') + '</div></div>' +
     '</div></div></div>';
 
@@ -625,8 +694,8 @@ function renderRace(pct) {
     '</div>';
 
   var bk = breakfastLeft();
-  if (bk > 0 && isRaceMorning()) {
-    h += '<div class="card"><span class="chip warn">🌅 ' + bk + ' breakfast item' + (bk === 1 ? '' : 's') + ' left — sold until ~11 AM</span></div>';
+  if ((bk.core > 0 || bk.stretch > 0) && isRaceMorning()) {
+    h += '<div class="card"><span class="chip warn">🌅 ' + bk.core + ' breakfast item' + (bk.core === 1 ? '' : 's') + (bk.stretch ? ' (+' + bk.stretch + ' ⭐ stretch)' : '') + ' left — sold until ~11 AM</span></div>';
   }
 
   var ck = crunchkinInfo(calEaten, calAll);
@@ -641,7 +710,7 @@ function renderRace(pct) {
     '</div></div></div>';
 
   var foodAll = 0, drinkAll = 0;
-  ITEMS.forEach(function (it) { if (isDrink(it)) drinkAll += it[4]; else foodAll += it[4]; });
+  CORE_ITEMS.forEach(function (it) { if (isDrink(it)) drinkAll += it[4]; else foodAll += it[4]; });
   var foodEaten = 0, drinkEaten = 0;
   totals.forEach(function (t) { foodEaten += t.foodCal; drinkEaten += t.drinkCal; });
   var spendEaten = 0;
@@ -652,17 +721,26 @@ function renderRace(pct) {
     '<div class="kv"><span class="k">🌮 from food</span><span class="num"><b>' + foodEaten.toLocaleString() + '</b> / ' + foodAll.toLocaleString() + '</span></div>' +
     '<div class="kv"><span class="k">🥤 from drinks</span><span class="num"><b>' + drinkEaten.toLocaleString() + '</b> / ' + drinkAll.toLocaleString() + '</span></div>' +
     '<div class="kv"><span class="k">💵 Damage</span><span class="num"><b>' + money(spendEaten) + '</b> / ~' + money(spendAll) + ' + tax</span></div>' +
-    '<div class="kv"><span class="k">Fair share</span><span class="num">~' + Math.round(ITEMS.length / 5) + ' items · ~' + Math.round(calAll / 5).toLocaleString() + ' cal each</span></div>' +
+    '<div class="kv"><span class="k">Fair share</span><span class="num">~' + Math.round(CORE_ITEMS.length / 5) + ' items · ~' + Math.round(calAll / 5).toLocaleString() + ' cal each</span></div>' +
     '<div class="pbar"><i style="width:' + Math.min(100, Math.round(calEaten / calAll * 100)) + '%;background:linear-gradient(90deg,var(--teal),var(--gold))"></i></div>' +
     '</div>';
-  h += '<div class="finish-note">Sunday 8/30 · 30 Taco Bells + 2 charge stops · ' + ITEMS.length + ' items · 5 riders · finish: 168th &amp; Maple</div>';
+
+  var st = stretchTotals();
+  h += '<div class="card"><h2>⭐ Stretch goal · full original menu</h2>' +
+    '<div class="kv"><span class="k">Every item, core + stretch</span><span class="num"><b>' + ec.all + '</b> / ' + ITEMS.length + '</span></div>' +
+    '<div class="kv"><span class="k">Stretch items eaten</span><span class="num"><b>' + st.eatenN + '</b> / ' + STRETCH_N + ' · ' + st.eatenCal.toLocaleString() + ' / ' + st.cal.toLocaleString() + ' cal</span></div>' +
+    '<div class="kv"><span class="k">Full-board damage</span><span class="num">+~' + money(st.price) + ' on top if we clear it</span></div>' +
+    '<div class="pbar"><i style="width:' + Math.round(ec.all / ITEMS.length * 100) + '%;background:linear-gradient(90deg,var(--gold),var(--teal))"></i></div>' +
+    '<div style="font-size:12px;color:var(--muted);margin-top:8px">The ' + STRETCH_N + ' variants deduped from the original 107-item menu, back as optional ⭐ items. No plan slots, no pressure — grab them off the Menu tab if we\'re feeling up for it.</div>' +
+    '</div>';
+  h += '<div class="finish-note">Sunday 8/30 · 30 Taco Bells + 2 charge stops · ' + CORE_ITEMS.length + ' items (+' + STRETCH_N + ' ⭐ stretch) · 5 riders · finish: 168th &amp; Maple</div>';
   h += '<div class="resetwrap"><button class="btn danger" id="resetbtn">Reset race data</button></div>';
   return h;
 }
 
 function renderMenu() {
   var h = '<input class="search" id="menusearch" type="search" placeholder="Search ' + ITEMS.length + ' items…" value="' + esc(menuSearch) + '">';
-  h += '<div class="filters">' + [['all', 'All'], ['left', 'Left'], ['eaten', 'Eaten']].map(function (f) {
+  h += '<div class="filters">' + [['all', 'All'], ['left', 'Left'], ['eaten', 'Eaten'], ['stretch', '⭐ Stretch']].map(function (f) {
     return '<button class="fbtn' + (menuFilter === f[0] ? ' on' : '') + '" data-filter="' + f[0] + '">' + f[1] + '</button>';
   }).join('') + '</div>';
   var q = menuSearch.toLowerCase();
@@ -672,25 +750,31 @@ function renderMenu() {
       var done = !!state.items[it[0]];
       if (menuFilter === 'left' && done) return false;
       if (menuFilter === 'eaten' && !done) return false;
+      if (menuFilter === 'stretch' && !isStretch(it)) return false;
       if (q && it[2].toLowerCase().indexOf(q) < 0) return false;
       return true;
     });
     if (!vis.length) return;
-    var doneN = rows.filter(function (it) { return !!state.items[it[0]]; }).length;
-    h += '<div class="cathdr"><span class="cn disp">' + esc(cat) + '</span><span class="cp num">' + doneN + '/' + rows.length + '</span></div>';
+    var coreRows = rows.filter(function (it) { return !isStretch(it); });
+    var stRows = rows.filter(isStretch);
+    var doneN = coreRows.filter(function (it) { return !!state.items[it[0]]; }).length;
+    var stDoneN = stRows.filter(function (it) { return !!state.items[it[0]]; }).length;
+    var cp = (coreRows.length ? doneN + '/' + coreRows.length : '') +
+      (stRows.length ? (coreRows.length ? ' · ' : '') + '⭐ ' + stDoneN + '/' + stRows.length : '');
+    h += '<div class="cathdr"><span class="cn disp">' + esc(cat) + '</span><span class="cp num">' + cp + '</span></div>';
     vis.forEach(function (it) {
       var e = state.items[it[0]];
       var chip = e && e.p != null
         ? '<span class="pchip" style="background:' + JERSEYS[e.p] + '">' + esc((state.names[e.p] || '?').charAt(0)) + '</span>'
         : '<span class="tick"></span>';
-      h += '<button class="itemrow' + (e ? ' done' : '') + '" data-item="' + it[0] + '">' + chip +
-        '<span class="nm">' + esc(it[2]) + (it[3] ? ' <span class="note">' + esc(it[3]) + '</span>' : '') +
+      h += '<button class="itemrow' + (e ? ' done' : '') + (isStretch(it) ? ' stretch' : '') + '" data-item="' + it[0] + '">' + chip +
+        '<span class="nm">' + (isStretch(it) ? '⭐ ' : '') + esc(it[2]) + (it[3] ? ' <span class="note">' + esc(it[3]) + '</span>' : '') +
         (e && e.s != null ? ' <span class="note num">· stage ' + (e.s + 1) + '</span>'
           : !e && PLAN_STOP[it[0]] != null ? ' <span class="note num">· plan stg ' + (PLAN_STOP[it[0]] + 1) + (PLAN_RIDER[it[0]] != null ? ' · ' + pInit(PLAN_RIDER[it[0]]) : '') + '</span>' : '') + '</span>' +
         '<span class="cal num">' + money(it[9]) + ' · ' + it[4] + (it[8] ? '~' : '') + ' cal</span></button>';
     });
   });
-  h += '<div class="finish-note">~ = estimated nutrition · prices from the Omaha tacobell.com store menu (pre-tax, vary slightly by store)</div>';
+  h += '<div class="finish-note">⭐ = stretch item (optional, not in the plan) · ~ = estimated nutrition · prices from the Omaha tacobell.com store menu (pre-tax, vary slightly by store)</div>';
   return h;
 }
 
@@ -811,7 +895,7 @@ function renderSquad() {
       '</div>' +
       '<div style="font-size:12px;color:var(--muted);margin-top:8px" class="num">🌮 ' + t.foodCal.toLocaleString() + ' cal food · 🥤 ' + t.drinkCal.toLocaleString() + ' cal drink</div>' +
       '<div class="pbar"><i style="width:' + (maxCal ? Math.round(t.cal / maxCal * 100) : 0) + '%;background:' + JERSEYS[p] + '"></i></div>' +
-      '<div style="font-size:12px;color:var(--muted);margin-top:6px" class="num">' + t.items + ' item' + (t.items === 1 ? '' : 's') + ' eaten · plan: ' + planRider[p].n + ' items / ~' + planRider[p].cal.toLocaleString() + ' cal</div>' +
+      '<div style="font-size:12px;color:var(--muted);margin-top:6px" class="num">' + t.items + ' item' + (t.items === 1 ? '' : 's') + ' eaten' + (t.stretch ? ' (' + t.stretch + ' ⭐)' : '') + ' · plan: ' + planRider[p].n + ' items / ~' + planRider[p].cal.toLocaleString() + ' cal</div>' +
       '</div>';
   }
   return h;
@@ -913,8 +997,8 @@ function openEatSheet(id) {
   var cur = state.items[id];
   var atStop = cur && cur.s != null ? cur.s : (nextStopIdx() >= 0 ? nextStopIdx() : undefined);
   var h = '<div class="overlay" id="overlay"><div class="sheet">' +
-    '<h3>' + esc(it[2]) + (it[3] ? ' · ' + esc(it[3]) : '') + '</h3>' +
-    '<div class="sub num">' + money(it[9]) + ' · ' + it[4] + (it[8] ? '~' : '') + ' cal · ' + it[5] + 'g protein · ' + it[6] + 'g carbs · ' + it[7] + 'g fat' +
+    '<h3>' + (isStretch(it) ? '⭐ ' : '') + esc(it[2]) + (it[3] ? ' · ' + esc(it[3]) : '') + '</h3>' +
+    '<div class="sub num">' + (isStretch(it) ? 'stretch item · optional · ' : '') + money(it[9]) + ' · ' + it[4] + (it[8] ? '~' : '') + ' cal · ' + it[5] + 'g protein · ' + it[6] + 'g carbs · ' + it[7] + 'g fat' +
     (atStop != null ? '<br>logs to stage ' + (atStop + 1) + ' · ' + esc(STOPS[atStop][0]) : '') + '</div>' +
     '<div class="eatgrid">';
   if (me >= 0 && !cur) h += '<button class="eatbtn big" data-eat="' + me + '" style="background:' + JERSEYS[me] + '">' + esc(state.names[me]) + ' ate it</button>';
@@ -960,7 +1044,7 @@ function openOrderSheet(si) {
       dots += '<button class="rdot' + (on ? ' on' : sug === p ? ' sug' : '') + '" style="background:' + JERSEYS[p] + '" data-oid="' + it[0] + '" data-op="' + p + '">' + esc((state.names[p] || '?').charAt(0)) + '</button>';
     }
     return '<div class="ordrow' + (e && e.s === si ? ' on' : '') + '">' +
-      '<div class="ordname"><span>' + esc(it[2]) + (it[3] ? ' <span class="note">' + esc(it[3]) + '</span>' : '') + '</span>' +
+      '<div class="ordname"><span>' + (isStretch(it) ? '⭐ ' : '') + esc(it[2]) + (it[3] ? ' <span class="note">' + esc(it[3]) + '</span>' : '') + '</span>' +
       '<span class="oc num">' + it[4] + (it[8] ? '~' : '') + ' cal</span></div>' +
       '<div class="orddots">' + dots + '</div></div>';
   }
