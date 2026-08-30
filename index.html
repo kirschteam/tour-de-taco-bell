@@ -80,6 +80,7 @@ var ITEMS = [
 ["n-bellgrande","Nachos","Nachos BellGrande® - Beef","",730,16,82,38,0,5.59],
 ["dec-beefy-crunch","New","Beefy Crunch Burrito","",450,13,52,21,1,2.99],
 ["dec-empanada","New","Caramel Apple Empanada","",290,3,37,14,1,2.99],
+["enchilada-fries","New","Chicken Enchilada Nacho Fries","",500,16,46,27,1,5.99],
 ["pj-melty","New","Melty Pepper Jack Steak Burrito","",440,20,44,18,1,3],
 ["dec-meximelt","New","Meximelt®","",250,11,22,13,1,3.29],
 ["dec-naked-chalupa","New","Naked Chicken Chalupa","",430,21,28,26,1,5.99],
@@ -113,10 +114,11 @@ var ITEMS = [
    discontinued: the Crispy Chicken line incl. Chipotle Bacon Melt, both Rockstar
    Refrescas, Dragonfruit Berry Refresca — plus the refresh's earlier cuts).
    Prices and calories are live store numbers; macros carried from the original
-   pull, scaled + est-flagged where calories drifted >5%. Also includes the six
-   items the store launched after the original pull (Fresca/Melty Steak
-   Burritos, Chicken Enchilada Nacho Fries, Strawberry Tropics Energy, the two
-   new freezes) — sibling-estimated macros, est-flagged. */
+   pull, scaled + est-flagged where calories drifted >5%. Also includes the
+   store-launched variants that dedupe would have cut (Fresca/Melty Steak
+   Burritos, Strawberry Tropics Energy, the two new freezes) — sibling-estimated
+   macros, est-flagged. Chicken Enchilada Nacho Fries is CORE, not stretch: the
+   only loaded fries left, its own family by the PJ Steak Nacho Fries precedent. */
 var STRETCH_ROWS = [
 ["bk-cal-cw-bacon","Breakfast","Breakfast California Crunchwrap","",640,21,51,38,1,4.29,1],
 ["bk-cw-bacon","Breakfast","Breakfast Crunchwrap - Bacon","",660,21,51,42,0,4.19,1],
@@ -151,7 +153,6 @@ var STRETCH_ROWS = [
 ["pj-fresca","New","Fresca Pepper Jack Steak Burrito","",500,24,53,20,1,3,1],
 ["fresca-steak","New","Fresca Steak Burrito","",490,24,52,20,1,3,1],
 ["melty-steak","New","Melty Steak Burrito","",440,20,44,18,1,3,1],
-["enchilada-fries","New","Chicken Enchilada Nacho Fries","",500,16,46,27,1,5.99,1],
 ["q-cheese","Quesadillas","Quesadilla - Cheese","",440,17,37,26,0,4.99,1],
 ["q-steak","Quesadillas","Quesadilla - Steak","",500,24,37,26,0,6.29,1],
 ["s-black-beans","Sides & Sweets","Black Beans","",50,2,8,1,0,1.79,1],
@@ -216,16 +217,19 @@ var COORDS = [[41.25933,-95.97077],[41.32834,-95.95829],[41.26165,-95.88856],[41
 
 /* planned order per stop: breakfast + coffee/OJ at stops 1-4 (gone by 11 AM),
    caffeinated drinks all placed by stage 19 (Rockstar energy at stage 5),
-   the rest calorie-balanced (~570-750 cal/stop), max 2 drinks per stop.
-   Charger stages (6 and 24) order nothing. */
-var PLAN = [["bk-cw-sausage"],["gtb-sausage","coffee-hot","bk-salsa"],["bk-q-sausage","oj"],["ctb-sausage","cin-coffee-hot","hash-brown"],["energy-pine-citrus","lx-griller"],[],["f-baja","s-nacho-fries","t-soft-beef"],["f-lipton-sweet","cbr","s-twists"],["f-brisk","cdb"],["f-drpepper","bs-beef"],["ds-baja","lx-salad","sp-rollup"],["f-pepsi","sp-flatbread"],["f-trop-lemonade","t-chalupa-beef"],["n-bellgrande"],["f-dew","bean-burrito","t-crunchy"],["baja-freeze","cc-crispy","cc-soft"],["gcb"],["tajin-taco","tajin-cgc"],["pj-melty"],["cc-rolled-q","av-verde"],["sp-mex-pizza","s-bb-rice"],["ref-strawpass","cc-burrito"],["sp-cws","s-pintos"],[],["f-mug","lx-stacker","t-dlt"],["q-chicken","t-spicy-potato"],["t-dcgc","n-chips-cheese"],["dec-naked-chalupa","dec-empanada"],["water","b5l","dec-meximelt"],["f-g2","cc-bowl"],["f-starry","dec-beefy-crunch","s-cinnabon"],["t-cgc","s-fiesta-pot"]];
+   the rest calorie-balanced (~570-750 cal/stop; stage 19 runs 940 with the
+   enchilada fries), max 2 drinks per stop. Charger stages (6 and 24) order
+   nothing. */
+var PLAN = [["bk-cw-sausage"],["gtb-sausage","coffee-hot","bk-salsa"],["bk-q-sausage","oj"],["ctb-sausage","cin-coffee-hot","hash-brown"],["energy-pine-citrus","lx-griller"],[],["f-baja","s-nacho-fries","t-soft-beef"],["f-lipton-sweet","cbr","s-twists"],["f-brisk","cdb"],["f-drpepper","bs-beef"],["ds-baja","lx-salad","sp-rollup"],["f-pepsi","sp-flatbread"],["f-trop-lemonade","t-chalupa-beef"],["n-bellgrande"],["f-dew","bean-burrito","t-crunchy"],["baja-freeze","cc-crispy","cc-soft"],["gcb"],["tajin-taco","tajin-cgc"],["pj-melty","enchilada-fries"],["cc-rolled-q","av-verde"],["sp-mex-pizza","s-bb-rice"],["ref-strawpass","cc-burrito"],["sp-cws","s-pintos"],[],["f-mug","lx-stacker","t-dlt"],["q-chicken","t-spicy-potato"],["t-dcgc","n-chips-cheese"],["dec-naked-chalupa","dec-empanada"],["water","b5l","dec-meximelt"],["f-g2","cc-bowl"],["f-starry","dec-beefy-crunch","s-cinnabon"],["t-cgc","s-fiesta-pot"]];
 var PLAN_STOP = {};
 PLAN.forEach(function (ids, i) { ids.forEach(function (id) { PLAN_STOP[id] = i; }); });
 
 /* planned rider per item: one item per rider per stop, balanced on food AND
-   drink calories (food 3,325-3,600 · drink 510-630 · total 3,835-4,230),
-   13-14 items each, 2-3 breakfast-stop items, 2-3 caffeinated drinks each */
-var PLAN_RIDER = {"bk-cw-sausage":4,"gtb-sausage":1,"coffee-hot":3,"bk-salsa":2,"bk-q-sausage":2,"oj":0,"ctb-sausage":3,"cin-coffee-hot":2,"hash-brown":0,"energy-pine-citrus":1,"lx-griller":0,"f-baja":4,"s-nacho-fries":3,"t-soft-beef":2,"f-lipton-sweet":3,"cbr":1,"s-twists":0,"f-brisk":1,"cdb":3,"f-drpepper":0,"bs-beef":2,"ds-baja":2,"lx-salad":4,"sp-rollup":0,"f-pepsi":3,"sp-flatbread":1,"f-trop-lemonade":1,"t-chalupa-beef":4,"n-bellgrande":0,"f-dew":4,"bean-burrito":3,"t-crunchy":2,"baja-freeze":0,"cc-crispy":2,"cc-soft":1,"gcb":4,"tajin-taco":1,"tajin-cgc":2,"pj-melty":1,"cc-rolled-q":2,"av-verde":0,"sp-mex-pizza":0,"s-bb-rice":4,"ref-strawpass":2,"cc-burrito":3,"sp-cws":2,"s-pintos":1,"f-mug":3,"lx-stacker":4,"t-dlt":0,"q-chicken":1,"t-spicy-potato":0,"t-dcgc":4,"n-chips-cheese":3,"dec-naked-chalupa":3,"dec-empanada":0,"water":4,"b5l":3,"dec-meximelt":1,"f-g2":1,"cc-bowl":4,"f-starry":4,"dec-beefy-crunch":1,"s-cinnabon":2,"t-cgc":0,"s-fiesta-pot":3};
+   drink calories (drink 510-630 · total 4,030-4,380 after the Chicken
+   Enchilada Nacho Fries add — it went to the lightest rider, slot 2, at
+   stage 19), 13-14 items each, 2-3 breakfast-stop items, 2-3 caffeinated
+   drinks each */
+var PLAN_RIDER = {"bk-cw-sausage":4,"gtb-sausage":1,"coffee-hot":3,"bk-salsa":2,"bk-q-sausage":2,"oj":0,"ctb-sausage":3,"cin-coffee-hot":2,"hash-brown":0,"energy-pine-citrus":1,"lx-griller":0,"f-baja":4,"s-nacho-fries":3,"t-soft-beef":2,"f-lipton-sweet":3,"cbr":1,"s-twists":0,"f-brisk":1,"cdb":3,"f-drpepper":0,"bs-beef":2,"ds-baja":2,"lx-salad":4,"sp-rollup":0,"f-pepsi":3,"sp-flatbread":1,"f-trop-lemonade":1,"t-chalupa-beef":4,"n-bellgrande":0,"f-dew":4,"bean-burrito":3,"t-crunchy":2,"baja-freeze":0,"cc-crispy":2,"cc-soft":1,"gcb":4,"tajin-taco":1,"tajin-cgc":2,"pj-melty":1,"enchilada-fries":2,"cc-rolled-q":2,"av-verde":0,"sp-mex-pizza":0,"s-bb-rice":4,"ref-strawpass":2,"cc-burrito":3,"sp-cws":2,"s-pintos":1,"f-mug":3,"lx-stacker":4,"t-dlt":0,"q-chicken":1,"t-spicy-potato":0,"t-dcgc":4,"n-chips-cheese":3,"dec-naked-chalupa":3,"dec-empanada":0,"water":4,"b5l":3,"dec-meximelt":1,"f-g2":1,"cc-bowl":4,"f-starry":4,"dec-beefy-crunch":1,"s-cinnabon":2,"t-cgc":0,"s-fiesta-pot":3};
 
 var JERSEYS = ["#FF3D9A","#3EE8D2","#FFC53D","#8FE85C","#B08CFF"];
 var DEFAULT_NAMES = ["Wyatt","Jack","Tyler","Alex","Ryan"];
